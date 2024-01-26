@@ -76,9 +76,7 @@
     "username_max_len": 10,
     "voice_change": false,
     "reply_before": [
-      "回复{username}",
-      "{username}",
-      "回{username}"
+      "回复{username}"
     ],
     "reply_after": [
       "以上内容回复{username}",
@@ -130,17 +128,12 @@
     "idle_time_task_forget_reserve_num": 1
   },
   "thanks": {
-    "entrance_enable": false,
+    "entrance_enable": true,
     "entrance_random": true,
     "username_max_len": 10,
     "entrance_copy": [
-      "欢迎{username}",
-      "这不是{username}嘛，几天不见，这么拉了",
-      "{username}来了啊，最近过得咋样",
-      "{username}啊，咋，想我了啊",
-      "欢迎{username}来看我的直播，有什么问题尽管问",
-      "客官里面请~",
-      "雅座一位，请~"
+      "{username}，アリスの生中継室へようこそ！",
+      "{username}，お会いできて嬉しいよ！"
     ],
     "gift_enable": false,
     "gift_random": true,
@@ -171,10 +164,10 @@
     "model": "gpt-3.5-turbo",
     "temperature": 0.9,
     "max_tokens": 4096,
-    "top_p": 0.5,
+    "top_p": 0.6,
     "presence_penalty": 0.0,
     "frequency_penalty": 0.0,
-    "preset": "现在你正在blibili进行直播。"
+    "preset": "现在你正代替老师在blibili进行直播。"
   },
   "claude": {
     "slack_user_token": "",
@@ -201,12 +194,14 @@
   "alice": {
     "api_ip_port": "http://localhost:8000/v1/chat/completions",
     "max_length": 4096,
-    "top_p": 0.5,
-    "temperature": 0.95,
+    "top_p": 0.9,
+    "temperature": 0.9,
     "max_new_tokens": 250,
     "history_enable": true,
-    "history_max_len": 20,
-    "preset": "现在你正在blibili进行直播。"
+    "history_max_len": 8,
+    "preset": "现在你正代替老师在blibili进行直播。",
+    "setting_document": "E:\\GitRepository\\AliceBot\\memory\\vector\\",
+    "autohotkey_enable": true
   },
   "sparkdesk": {
     "type": "web",
@@ -401,7 +396,7 @@
     "config_path": "E:\\GitRepository\\vits-simple-api\\Model\\alice\\config.json",
     "api_ip_port": "http://127.0.0.1:23456",
     "id": "0",
-    "lang": "日文",
+    "lang": "自动",
     "length": "1",
     "noise": "0.33",
     "noisew": "0.4",
@@ -601,11 +596,11 @@
     "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.42"
   },
   "talk": {
-    "key_listener_enable": false,
-    "device_index": "1",
-    "username": "主人",
+    "key_listener_enable": true,
+    "device_index": "2",
+    "username": "悪魔sama",
     "type": "google",
-    "continuous_talk": false,
+    "continuous_talk": true,
     "trigger_key": "Q",
     "stop_trigger_key": "S",
     "volume_threshold": 800.0,
@@ -652,46 +647,25 @@
     }
   ],
   "idle_time_task": {
-    "enable": false,
-    "idle_time": 120,
+    "enable": true,
+    "idle_time": "100",
     "random_time": false,
     "comment": {
-      "enable": false,
+      "enable": true,
       "random": true,
       "copy": [
-        "请给我简单地介绍一项最新的未来科技，它的原理、应用场景以及对我们生活的影响。控制在100字以内",
-        "请给我简单地推荐一首流行歌曲，并分享一下它的创作背景、歌词寓意以及为什么你喜欢这首歌。控制在100字以内",
-        "请给我简单地介绍一种流行的美妆技巧，包括步骤、适用场合以及如何根据自己的特点进行个性化调整。控制在100字以内",
-        "请给我简单地分享一个健康的食谱，包括食材搭配、烹饪方法以及为什么这个食谱对身体健康有益。控制在100字以内",
-        "请给我简单地分享一个值得让人思考的故事.控制在100字以内",
-        "请给我简单地讲一个笑话，让我在忙碌的生活中找到轻松和快乐。控制在100字以内"
+        "（现在直播间里没有人，爱丽丝找了点事情给自己做）",
+        "（爱丽丝开始觉得没有观众互动很无聊）",
+        "（没有人与爱丽丝聊天，于是爱丽丝开始躺在地上打盹）",
+        "（爱丽丝闲得无聊，于是开始游玩最新的游戏）",
+        "（爱丽丝哼着小曲，期待着观众的到来）",
+        "（爱丽丝又在网络上赢得了一场格斗对战的胜利）"
       ]
     },
     "local_audio": {
       "enable": false,
-      "random": true,
-      "path": [
-        "song/ikaros/枝垂樱-缩减版.mp3",
-        "data/闲时任务/音频/ikaros/不管发生什么，我都会在主人身边.wav",
-        "data/闲时任务/音频/ikaros/不管是谁下的命令，一旦主人有什么三长两短，我决不轻饶.wav",
-        "data/闲时任务/音频/ikaros/主人在想些什么呢.wav",
-        "data/闲时任务/音频/ikaros/主人，你刚才是不是说我们会永远在一起.wav",
-        "data/闲时任务/音频/ikaros/主人，您还好吗.wav",
-        "data/闲时任务/音频/ikaros/主人，茶泡好了.wav",
-        "data/闲时任务/音频/ikaros/你醒了吗，主人.wav",
-        "data/闲时任务/音频/ikaros/好想赶快见到主人.wav",
-        "data/闲时任务/音频/ikaros/对了，加油努力，让主人表扬我的话，肯定.wav",
-        "data/闲时任务/音频/ikaros/怎样才能牵主人的手呢.wav",
-        "data/闲时任务/音频/ikaros/我一点都帮不上主人的忙.wav",
-        "data/闲时任务/音频/ikaros/我也想牵主人的手.wav",
-        "data/闲时任务/音频/ikaros/我和主人在一起，怎么说呢，心有种轻飘飘的感觉.wav",
-        "data/闲时任务/音频/ikaros/我想在主人身边，从今往后.wav",
-        "data/闲时任务/音频/ikaros/我是主人最讨厌的兵器，这样瞒住主人真的好吗.wav",
-        "data/闲时任务/音频/ikaros/我是玩赏用天使，我要回到主人的身边.wav",
-        "data/闲时任务/音频/ikaros/知道主人在哪里吗.wav",
-        "data/闲时任务/音频/ikaros/遇到麻烦了吗，主人.wav",
-        "data/闲时任务/音频/ikaros/那个，主人，睡觉是怎么一回事.wav"
-      ]
+      "random": false,
+      "path": []
     }
   },
   "database": {

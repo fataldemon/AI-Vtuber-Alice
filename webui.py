@@ -844,6 +844,8 @@ def goto_func_page():
                 config_data["alice"]["history_enable"] = switch_alice_history_enable.value
                 config_data["alice"]["history_max_len"] = int(input_alice_history_max_len.value)
                 config_data["alice"]["preset"] = input_alice_preset.value
+                config_data["alice"]["setting_document"] = input_alice_setting_document.value
+                config_data["alice"]["autohotkey_enable"] = switch_alice_autohotkey_enable.value
 
                 config_data["chat_with_file"]["chat_mode"] = select_chat_with_file_chat_mode.value
                 config_data["chat_with_file"]["data_path"] = input_chat_with_file_data_path.value
@@ -1865,6 +1867,10 @@ def goto_func_page():
                     input_alice_preset = ui.input(label='预设',
                                                     placeholder='用于指定一组预定义的设置，以便模型更好地适应特定的对话场景。',
                                                     value=config.get("chatgpt", "preset")).style("width:500px")
+                with ui.row():
+                    input_alice_setting_document = ui.input(label='设定文档地址', placeholder='放置设定文件的文档绝对地址，使用embedding传入LLM', value=config.get("alice", "setting_document"))
+                    input_alice_setting_document.style("width:500px")
+                    switch_alice_autohotkey_enable = ui.switch('保证AutoHotKey脚本运行，表情动作控制', value=config.get("alice", "autohotkey_enable")).style(switch_internal_css)
 
 
             with ui.card().style(card_css):

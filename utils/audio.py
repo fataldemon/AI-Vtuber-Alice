@@ -1,4 +1,6 @@
 import time, logging
+
+import pyautogui
 import requests
 import json, threading
 import subprocess
@@ -68,6 +70,11 @@ class Audio:
         self.config = Config(config_path)
         self.common = Common()
         self.my_tts = MY_TTS(config_path)
+
+        if self.config.get("chat_type") == "alice" and self.config.get("alice", "autohotkey_enable"):
+            self.motion_enable = True
+        else:
+            self.motion_enable = False
 
         # 文案模式
         if type == 2:
@@ -891,13 +898,23 @@ class Audio:
                                 }
                             Audio.audio_player.play(data_json)
                         else:
+                            # 说话时应用说话动作
+                            if self.motion_enable:
+                                moves = ["f1", "f3", "f4"]
+                                random_move = moves[random.randint(0, 2)]
+                                pyautogui.press(random_move)
                             logging.debug(f"voice_tmp_path={voice_tmp_path}")
                             # 使用pygame播放音频
                             Audio.mixer_normal.music.load(voice_tmp_path)
+
                             Audio.mixer_normal.music.play()
                             while Audio.mixer_normal.music.get_busy():
                                 pygame.time.Clock().tick(10)
                             Audio.mixer_normal.music.stop()
+                            # 说话完毕时切换到停止姿态
+                            if self.motion_enable:
+                                pyautogui.press("num9")
+                                pyautogui.press("num0")
 
                     # 是否启用字幕输出
                     #if captions_config["enable"]:

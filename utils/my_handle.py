@@ -1994,6 +1994,14 @@ class My_handle(metaclass=SingletonMeta):
                 if resp_content is None:
                     return
 
+                    # 回复内容是否进行翻译
+                if My_handle.config.get("translate", "enable") and (
+                        My_handle.config.get("translate", "trans_type") == "回复" or \
+                        My_handle.config.get("translate", "trans_type") == "弹幕+回复"):
+                    if My_handle.config.get("translate", "type") == "baidu":
+                        tmp = My_handle.my_translate.baidu_trans(resp_content)
+                        if tmp:
+                            resp_content = tmp
                 # logger.info("resp_content=" + resp_content)
 
                 # 将 AI 回复记录到日志文件中
