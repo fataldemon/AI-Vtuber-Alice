@@ -583,6 +583,7 @@ def goto_func_page():
                 config_data["captions"]["enable"] = switch_captions_enable.value
                 config_data["captions"]["file_path"] = input_captions_file_path.value
                 config_data["captions"]["raw_file_path"] = input_captions_raw_file_path.value
+                config_data["captions"]["origin_file_path"] = input_captions_origin_file_path.value
 
                 # 本地问答
                 config_data["local_qa"]["text"]["enable"] = switch_local_qa_text_enable.value
@@ -1478,6 +1479,9 @@ def goto_func_page():
                     input_captions_file_path = ui.input(label='字幕日志路径', placeholder='字幕日志存储路径', value=config.get("captions", "file_path")).style("width:200px;")
                     input_captions_raw_file_path = ui.input(label='原文字幕日志路径', placeholder='原文字幕日志存储路径',
                                                         value=config.get("captions", "raw_file_path")).style("width:200px;")
+                    input_captions_origin_file_path = ui.input(label='原弹幕日志路径',
+                                                            placeholder='回答的原弹幕日志路径',
+                                                            value=config.get("captions", "origin_file_path")).style("width:200px;")
             with ui.card().style(card_css):
                 ui.label('本地问答')
                 with ui.grid(columns=5):

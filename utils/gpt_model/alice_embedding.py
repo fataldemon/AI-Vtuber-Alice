@@ -4,7 +4,7 @@ import numpy as np
 import pickle
 from sentence_transformers import SentenceTransformer
 
-model = SentenceTransformer('moka-ai/m3e-base')
+model = SentenceTransformer('DMetaSoul/Dmeta-embedding')
 
 doc_folder = "memory/"
 vector_folder = "memory/vector/"

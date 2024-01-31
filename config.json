@@ -167,7 +167,7 @@
     "top_p": 0.6,
     "presence_penalty": 0.0,
     "frequency_penalty": 0.0,
-    "preset": "现在你正代替老师在blibili进行直播。"
+    "preset": "现在你正代替老师在blibili进行直播，下播时间是1月31日0点。"
   },
   "claude": {
     "slack_user_token": "",
@@ -198,8 +198,8 @@
     "temperature": 0.9,
     "max_new_tokens": 250,
     "history_enable": true,
-    "history_max_len": 8,
-    "preset": "现在你正代替老师在blibili进行直播。",
+    "history_max_len": 6,
+    "preset": "现在你正代替老师在blibili进行直播，下播时间是1月31日0点。",
     "setting_document": "E:\\GitRepository\\AliceBot\\memory\\vector\\",
     "autohotkey_enable": true
   },
@@ -626,7 +626,8 @@
   "captions": {
     "enable": true,
     "file_path": "log/字幕.txt",
-    "raw_file_path": "log/原文字幕.txt"
+    "raw_file_path": "log/原文字幕.txt",
+    "origin_file_path": "log/回复对象.txt"
   },
   "schedule": [
     {
@@ -649,7 +650,7 @@
   "idle_time_task": {
     "enable": true,
     "idle_time": "100",
-    "random_time": false,
+    "random_time": true,
     "comment": {
       "enable": true,
       "random": true,

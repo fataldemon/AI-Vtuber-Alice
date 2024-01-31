@@ -75,7 +75,7 @@ class Common:
             return str(second)
         elif type == 3:
             current_time = time.time()  # 返回自1970年1月1日以来的秒数
-
+            tgt_time = current_time % 100  # 用于生成音频文件名
             return str(current_time)
         elif type == 4:
             current_time = time.time()  # 返回自1970年1月1日以来的秒数

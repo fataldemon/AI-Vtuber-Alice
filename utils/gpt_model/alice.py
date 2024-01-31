@@ -1,11 +1,8 @@
 import json
 import logging
-from random import random
 from typing import Dict
 import requests
-import re
 import datetime
-import pyautogui
 
 from utils.common import Common
 from utils.logger import Configure_logger
@@ -39,108 +36,6 @@ tools = [
                 ],
             },
 ]
-
-
-def remove_emotion(message: str, emoji: bool) -> str:
-    """
-    去除描述表情的部分（如【开心】，要求AI输出格式固定）
-    """
-    pattern = r'\【[^\】^\]]*[\]\】]'
-    match = re.findall(pattern, message)
-    if not len(match) == 0:
-        print(match)
-        print(f"emotion:{match[0]}")
-        # 表情转动作（通过AutoHotKey读取键盘操作）
-        if emoji:
-            emojis = {
-                "【认真】": "num1",
-                "【坚定】": "num1",
-                "【承诺】": "num1",
-                "【生气】": "num1",
-                "【烦恼】": "num1",
-                "【诚实】": "substract",
-                "【期待】": "num8",
-                "【回答】": "substract",
-                "【回忆】": "num5",
-                "【发愣】": "substract",
-                "【察觉】": "substract",
-                "【建议】": "num8",
-                "【好奇】": "substract",
-                "【自信】": "add",
-                "【自豪】": "add",
-                "【解释】": "num8",
-                "【失望】": "num3",
-                "【委屈】": "num3",
-                "【伤心】": "num3",
-                "【高兴】": "num8",
-                "【开心】": "num4",
-                "【欢迎】": "num8",
-                "【崇拜】": "num8",
-                "【愉快】": "num8",
-                "【贴心】": "num8",
-                "【赞同】": "num8",
-                "【邀请】": "num8",
-                "【兴奋】": "num4",
-                "【快乐】": "num4",
-                "【为难】": "num3",
-                "【紧张】": "num3",
-                "【困惑】": "del",
-                "【困扰】": "del",
-                "【疑惑】": "del",
-                "【害怕】": "num3",
-                "【平和】": "num0",
-                "【无聊】": "num0",
-                "【慌张】": "num3",
-                "【害羞】": "num3",
-                "【羞涩】": "num3",
-                "【微笑】": "numpadadd",
-                "【惊喜】": "num8",
-                "【理解】": "num8",
-                "【喜悦】": "num8",
-                "【流汗】": "num3",
-                "【犹豫】": "num3",
-                "【震惊】": "multiply",
-                "【惊讶】": "multiply",
-                "【思考】": "num5",
-                "【沉思】": "num5",
-                "【否认】": "num5",
-                "【睡觉】": "num5",
-                "【熟睡】": "num5",
-                "【困倦】": "num5",
-                "【陈述】": "num0",
-                "【祈祷】": "num5",
-                "【拒绝】": "num1",
-                "【感动】": "add",
-                "【感激】": "add",
-                "【道歉】": "num3",
-            }
-            if emojis.get(match[0]) is not None:
-                pyautogui.press(emojis.get(match[0]))
-            else:
-                pyautogui.press("num0")
-        return message.replace(match[0], "")
-    else:
-        return message
-
-
-def remove_action(line: str) -> str:
-    """
-    去除括号里描述动作的部分（要求AI输出格式固定）
-    :param line:
-    :return:
-    """
-    line = line.replace("(", "（")
-    line = line.replace(")", "）")
-    pattern = r'\（[^\（^\）]*\）'
-    match = re.findall(pattern, line)
-    if len(match) == 0:
-        return line
-    else:
-        print(f"有{len(match)+1}段描述动作的语句")
-        for i in range(len(match)):
-            print(match[i])
-            line = line.replace(match[i], "")
-        return line
 
 
 class Qwen_alice:
@@ -187,11 +82,8 @@ class Qwen_alice:
             tips = ""
         else:
             user_name = "名为“" + user_name + "”的观众"
-            tips = ""
-        if user_name == "闲时任务":
-            self.common.write_content_to_file("log/回复对象.txt", f"{prompt}", write_log=False)
-        else:
-            self.common.write_content_to_file("log/回复对象.txt", f"{user_name}说：{prompt}", write_log=False)
+            tips = "他说的话有可能是假的，需要仔细判断后再作出回答。"
+
         if user_name == "闲时任务":
             message = f"{prompt}\n（当前时间：{current_time_str}。{tips}）"
         else:
@@ -245,7 +137,7 @@ class Qwen_alice:
         knowledge = vector_search(self.setting_document, prompt, 1)
         # print("embedding" + knowledge)
         # construct query
-        query = self.construct_query(user_name, prompt, embedding=f"{knowledge}{self.preset}不要重复之前的回答，回答不要超过150个字。\n爱丽丝的状态栏：职业：勇者；经验值：0/100；生命值：1000；攻击力：100；持有的财富：100点信用积分；装备：“光之剑”（电磁炮）；持有的道具：['光之剑']。")
+        query = self.construct_query(user_name, prompt, embedding=f"{knowledge}{self.preset}不要重复之前的回答，回答不要超过120个字。\n爱丽丝的状态栏：职业：勇者；经验值：0/100；生命值：1000；攻击力：100；持有的财富：100点信用积分；装备：“光之剑”（电磁炮）；持有的道具：['光之剑']。")
 
         try:
             response = requests.post(url=self.api_ip_port, json=query)
@@ -272,7 +164,7 @@ class Qwen_alice:
                 else:
                     self.history = []
 
-            return remove_action(remove_emotion(predictions, self.emoji_enable))
+            return predictions
         except Exception as e:
             logging.info(e)
             return None

@@ -61,10 +61,6 @@ class My_Translate:
         # Build request
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
         payload = {'appid': appid, 'q': text, 'from': from_lang, 'to': to_lang, 'salt': salt, 'sign': sign}
-        # 是否启用字幕输出
-        if captions_config["enable"]:
-            # 输出当前播放的音频文件的文本内容到字幕文件中
-            self.common.write_content_to_file(captions_config["raw_file_path"], f"爱丽丝回复说：{text}", write_log=False)
 
         try:
             # Send request
@@ -76,9 +72,11 @@ class My_Translate:
             translation = translation.replace("パパパパ", "パンパカパーン")
             translation = translation.replace("ボンボン", "パンパカパーン")
             translation = translation.replace("カトパンカトパン", "パンパカパーン")
+            translation = translation.replace("パンパカパーンカパン", "パンパカパーン")
             translation = translation.replace("RPG", "アールピージー")
             translation = translation.replace("HP", "エイチピー")
             translation = translation.replace("桃井さん", "モモイ")
+            translation = translation.replace("桃ちゃん", "モモイ")
             translation = translation.replace("緑ちゃん", "ミドリ")
             translation = translation.replace("緑さん", "ミドリ")
             translation = translation.replace("みどりちゃん", "ミドリ")
@@ -86,6 +84,9 @@ class My_Translate:
             translation = translation.replace("優香さん", "ユウカ")
             translation = translation.replace("優香", "ユウカ")
             translation = translation.replace("孥", "ヌ")
+            translation = translation.replace("日鞠", "ヒマリ")
+            translation = translation.replace("日奈", "ヒナ")
+            translation = translation.replace("Kei", "ケイ")
 
             return translation
             # Show response

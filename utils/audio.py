@@ -24,6 +24,7 @@ from .logger import Configure_logger
 from .config import Config
 from utils.audio_handle.my_tts import MY_TTS
 from utils.audio_handle.audio_player import AUDIO_PLAYER
+from utils.gpt_model.alice_action_control import remove_action, remove_emotion
 
 
 class Audio:
@@ -395,7 +396,9 @@ class Audio:
                         "type": message['type'],
                         "tts_type": "none",
                         "voice_path": message['file_path'],
-                        "content": message["content"]
+                        "content": message["content"],
+                        "raw_content": message["raw_content"],
+                        "origin_query": message["origin_query"]
                     }
 
                     if "insert_index" in data_json:
@@ -500,7 +503,10 @@ class Audio:
             data_json = {
                 "type": message['type'],
                 "voice_path": voice_tmp_path,
-                "content": message["content"]
+                "content": message["content"],
+                "raw_content": message["raw_content"],
+                "origin_query": message["origin_query"],
+                "user_name": message["user_name"]
             }
 
             if "insert_index" in message:
@@ -844,9 +850,21 @@ class Audio:
                         await asyncio.sleep(float(self.config.get("copywriting", "switching_interval")))
                         logging.debug(f"切换间隔结束，准备播放普通音频")
 
+                    print(data_json)
+                    origin_query = data_json["origin_query"]
+                    raw_content = data_json["raw_content"]
+                    user_name = data_json["user_name"]
                     # 是否启用字幕输出
                     if captions_config["enable"]:
+                        if user_name == "悪魔sama":
+                            self.common.write_content_to_file(captions_config["origin_file_path"],
+                                                              f"老师说：{origin_query}", write_log=False)
+                        else:
+                            self.common.write_content_to_file(captions_config["origin_file_path"],
+                                                              f"名为“{user_name}”的观众说：{origin_query}", write_log=False)
                         # 输出当前播放的音频文件的文本内容到字幕文件中
+                        self.common.write_content_to_file(captions_config["raw_file_path"], f"爱丽丝回复说：{remove_action(remove_emotion(raw_content, self.motion_enable))}",
+                                                          write_log=False)
                         self.common.write_content_to_file(captions_config["file_path"], data_json["content"], write_log=False)
 
 

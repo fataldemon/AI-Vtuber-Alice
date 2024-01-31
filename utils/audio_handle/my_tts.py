@@ -112,7 +112,7 @@ class MY_TTS:
                 async with session.get(url, timeout=self.timeout) as response:
                     response = await response.read()
                     # print(response)
-                    file_name = 'vits_' + self.common.get_bj_time(4) + '.wav'
+                    file_name = f'vits_{self.common.get_bj_time(3)}.wav'
                     voice_tmp_path = self.common.get_new_audio_path(self.audio_out_path, file_name)
                     with open(voice_tmp_path, 'wb') as f:
                         f.write(response)

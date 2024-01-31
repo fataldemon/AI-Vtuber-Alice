@@ -14,6 +14,7 @@ from .gpt_model.gpt import GPT_MODEL
 from .logger import Configure_logger
 from .db import SQLiteDB
 from .my_translate import My_Translate
+from utils.gpt_model.alice_action_control import remove_action, remove_emotion
 
 
 """
@@ -1683,11 +1684,16 @@ class My_handle(metaclass=SingletonMeta):
 
             # logger.info("resp_content=" + resp_content)
 
+            # 保存翻译前的回复信息（对爱丽丝，保留表情和动作信息）
+            raw_content = resp_content
             # 回复内容是否进行翻译
             if My_handle.config.get("translate", "enable") and (My_handle.config.get("translate", "trans_type") == "回复" or \
                 My_handle.config.get("translate", "trans_type") == "弹幕+回复"):
                 if My_handle.config.get("translate", "type") == "baidu":
-                    tmp = My_handle.my_translate.baidu_trans(resp_content)
+                    if chat_type == "alice":  # 翻译时对爱丽丝移除回复中的动作和表情
+                        tmp = My_handle.my_translate.baidu_trans(remove_action(remove_emotion(resp_content, False)))
+                    else:
+                        tmp = My_handle.my_translate.baidu_trans(resp_content)
                     if tmp:
                         resp_content = tmp
 
@@ -1725,7 +1731,9 @@ class My_handle(metaclass=SingletonMeta):
                 "data": My_handle.config.get(My_handle.config.get("audio_synthesis_type")),
                 "config": My_handle.config.get("filter"),
                 "user_name": user_name,
-                "content": resp_content
+                "content": resp_content,
+                "raw_content": raw_content,
+                "origin_query": content
             }
 
             self.audio_synthesis_handle(message)
@@ -1977,6 +1985,8 @@ class My_handle(metaclass=SingletonMeta):
                     
                     # 调用LLM统一接口，获取返回内容
                     resp_content = self.llm_handle(chat_type, data_json) if chat_type != "game" else ""
+                    self.common.write_content_to_file(My_handle.config.get("captions", "origin_file_path"),
+                                                      f"{content}", write_log=False)
 
                     if resp_content:
                         logging.info(f"[AI回复{user_name}]：{resp_content}")
@@ -1994,12 +2004,18 @@ class My_handle(metaclass=SingletonMeta):
                 if resp_content is None:
                     return
 
-                    # 回复内容是否进行翻译
+                # 保存翻译前的回复信息（对爱丽丝，保留表情和动作信息）
+                raw_content = resp_content
+                # 回复内容是否进行翻译
                 if My_handle.config.get("translate", "enable") and (
                         My_handle.config.get("translate", "trans_type") == "回复" or \
                         My_handle.config.get("translate", "trans_type") == "弹幕+回复"):
                     if My_handle.config.get("translate", "type") == "baidu":
-                        tmp = My_handle.my_translate.baidu_trans(resp_content)
+                        if chat_type == "alice":  # 翻译时对爱丽丝移除回复中的动作和表情
+                            tmp = My_handle.my_translate.baidu_trans(
+                                remove_action(remove_emotion(resp_content, False)))
+                        else:
+                            tmp = My_handle.my_translate.baidu_trans(resp_content)
                         if tmp:
                             resp_content = tmp
                 # logger.info("resp_content=" + resp_content)
@@ -2039,7 +2055,9 @@ class My_handle(metaclass=SingletonMeta):
                     "config": My_handle.config.get("filter"),
                     "user_name": user_name,
                     "content": resp_content,
-                    "content_type": "comment"
+                    "content_type": "comment",
+                    "raw_content": raw_content,
+                    "origin_query": content
                 }
 
                 
