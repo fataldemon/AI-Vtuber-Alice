@@ -95,6 +95,21 @@
     ]
   },
   "filter": {
+    "keyword_must_str": [
+      "爱丽丝",
+      "AL-1S",
+      "Alice",
+      "alice",
+      "アリス",
+      "邦邦咔邦",
+      "パンパカパーン",
+      "你好",
+      "早",
+      "晚安",
+      "女儿",
+      "你",
+      "主播"
+    ],
     "before_must_str": [],
     "after_must_str": [],
     "before_filter_str": [
@@ -167,7 +182,7 @@
     "top_p": 0.6,
     "presence_penalty": 0.0,
     "frequency_penalty": 0.0,
-    "preset": "现在你正代替老师在blibili进行直播，下播时间是1月31日0点。"
+    "preset": ""
   },
   "claude": {
     "slack_user_token": "",
@@ -199,7 +214,7 @@
     "max_new_tokens": 250,
     "history_enable": true,
     "history_max_len": 6,
-    "preset": "现在你正代替老师在blibili进行直播，下播时间是1月31日0点。",
+    "preset": "老师正在blibili进行游戏直播，游戏名称是《渎神》，是西班牙公司制作的横版过关游戏，难度很高。此刻你正作为老师的助手负责帮老师回复弹幕。下播时间需要看老师的意思。",
     "setting_document": "E:\\GitRepository\\AliceBot\\memory\\vector\\",
     "autohotkey_enable": true
   },
@@ -597,7 +612,7 @@
   },
   "talk": {
     "key_listener_enable": true,
-    "device_index": "2",
+    "device_index": null,
     "username": "悪魔sama",
     "type": "google",
     "continuous_talk": true,

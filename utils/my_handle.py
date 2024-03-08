@@ -862,6 +862,11 @@ class My_handle(metaclass=SingletonMeta):
                 content.endswith(prefix) for prefix in My_handle.config.get("filter")["after_filter_str"]):
             return None
 
+        # 判断弹幕是否包含xx关键词，如果不是则返回None
+        if My_handle.config.get("filter")["keyword_must_str"] and not any(
+                keyword in content for keyword in My_handle.config.get("filter")["keyword_must_str"]):
+            return None
+
         # 判断弹幕是否以xx起始，如果不是则返回None
         if My_handle.config.get("filter")["before_must_str"] and not any(
                 content.startswith(prefix) for prefix in My_handle.config.get("filter")["before_must_str"]):

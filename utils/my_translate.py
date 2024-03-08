@@ -69,6 +69,7 @@ class My_Translate:
 
             logging.info(f"百度翻译结果={result}")
             translation = result["trans_result"][0]["dst"]
+            translation = translation.replace("先生", "せんせい")
             translation = translation.replace("パパパパ", "パンパカパーン")
             translation = translation.replace("ボンボン", "パンパカパーン")
             translation = translation.replace("カトパンカトパン", "パンパカパーン")
@@ -87,6 +88,7 @@ class My_Translate:
             translation = translation.replace("日鞠", "ヒマリ")
             translation = translation.replace("日奈", "ヒナ")
             translation = translation.replace("Kei", "ケイ")
+            translation = translation.replace("真理部", "ヴェリタス")
 
             return translation
             # Show response

@@ -600,6 +600,7 @@ def goto_func_page():
                 config_data["local_qa"]["audio"]["similarity"] = round(float(input_local_qa_audio_similarity.value), 2)
             
                 # 过滤
+                config_data["filter"]["keyword_must_str"] = common_textarea_handle(textarea_filter_keyword_must_str.value)
                 config_data["filter"]["before_must_str"] = common_textarea_handle(textarea_filter_before_must_str.value)
                 config_data["filter"]["after_must_str"] = common_textarea_handle(textarea_filter_after_must_str.value)
                 config_data["filter"]["before_filter_str"] = common_textarea_handle(textarea_filter_before_filter_str.value)
@@ -1499,7 +1500,9 @@ def goto_func_page():
                     input_local_qa_audio_file_path = ui.input(label='音频存储路径', placeholder='本地问答音频文件存储路径', value=config.get("local_qa", "audio", "file_path")).style("width:200px;")
                     input_local_qa_audio_similarity = ui.input(label='音频最低相似度', placeholder='最低音频匹配相似度，就是说用户发送的内容和本地音频库中音频文件名的最低相似度。\n低了就会被当做一般弹幕处理', value=config.get("local_qa", "audio", "similarity")).style("width:200px;")
             with ui.card().style(card_css):
-                ui.label('过滤')    
+                ui.label('过滤')
+                with ui.grid(columns=1):
+                    textarea_filter_keyword_must_str = ui.textarea(label='弹幕触发关键词', placeholder='弹幕必须携带其中任一字符串才能触发\n例如：配置爱丽丝，那么这个会触发：爱丽丝，你好啊~', value=textarea_data_change(config.get("filter", "keyword_must_str"))).style("width:300px;")
                 with ui.grid(columns=4):
                     textarea_filter_before_must_str = ui.textarea(label='弹幕触发前缀', placeholder='前缀必须携带其中任一字符串才能触发\n例如：配置#，那么这个会触发：#你好', value=textarea_data_change(config.get("filter", "before_must_str"))).style("width:300px;")
                     textarea_filter_after_must_str = ui.textarea(label='弹幕触发后缀', placeholder='后缀必须携带其中任一字符串才能触发\n例如：配置。那么这个会触发：你好。', value=textarea_data_change(config.get("filter", "before_must_str"))).style("width:300px;")
@@ -1870,7 +1873,7 @@ def goto_func_page():
                     input_alice_history_max_len.style("width:200px")
                     input_alice_preset = ui.input(label='预设',
                                                     placeholder='用于指定一组预定义的设置，以便模型更好地适应特定的对话场景。',
-                                                    value=config.get("chatgpt", "preset")).style("width:500px")
+                                                    value=config.get("alice", "preset")).style("width:500px")
                 with ui.row():
                     input_alice_setting_document = ui.input(label='设定文档地址', placeholder='放置设定文件的文档绝对地址，使用embedding传入LLM', value=config.get("alice", "setting_document"))
                     input_alice_setting_document.style("width:500px")

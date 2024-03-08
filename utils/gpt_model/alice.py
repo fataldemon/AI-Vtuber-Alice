@@ -43,7 +43,7 @@ class Qwen_alice:
     def __init__(self, data):
         self.common = Common()
         # 日志文件路径
-        file_path = "./log/log-" + self.common.get_bj_time(1) + ".txt"
+        file_path = "./log/log-alice-" + self.common.get_bj_time(1) + ".txt"
         Configure_logger(file_path)
 
         self.api_ip_port = data["api_ip_port"]
@@ -70,6 +70,7 @@ class Qwen_alice:
         # 获取当前时间
         current_time = datetime.datetime.now()
         current_time_str = current_time.strftime("%Y-%m-%d %H:%M:%S")
+        weekday = current_time.weekday()
         if prompt == "/记忆清除术" and user_name == "悪魔sama":
             self.memory_clear_sign = True
         else:
@@ -82,12 +83,12 @@ class Qwen_alice:
             tips = ""
         else:
             user_name = "名为“" + user_name + "”的观众"
-            tips = "他说的话有可能是假的，需要仔细判断后再作出回答。"
+            tips = "他说的话可能不是真的，需要仔细判断后再作出回答。"
 
         if user_name == "闲时任务":
             message = f"{prompt}\n（当前时间：{current_time_str}。{tips}）"
         else:
-            message = f"（{user_name}说）{prompt}\n（当前时间：{current_time_str}。{tips}）"
+            message = f"（{user_name}说）{prompt}\n（当前时间：{current_time_str}，星期{weekday}。{tips}）"
 
         messages = self.history + [{"role": "user", "content": message}]
         query = {
@@ -107,6 +108,7 @@ class Qwen_alice:
             raw_prompt = message
 
         self.history = self.history + [{"role": "user", "content": raw_prompt}]
+        logging.info(f"\"role\": \"user\", \"content\": \"{raw_prompt}\"")
         return query
 
 
@@ -125,6 +127,7 @@ class Qwen_alice:
             "messages": messages,
             "temperature": self.temperature,
             "top_p": self.top_p,
+            "repetition_penalty": 1.1,
             "stream": False,  # 不启用流式API
         }
         self.history = messages
@@ -134,10 +137,10 @@ class Qwen_alice:
     # 调用chatglm接口，获取返回内容
     def get_resp(self, user_name, prompt):
         # 向量查询获取知识
-        knowledge = vector_search(self.setting_document, prompt, 1)
+        knowledge = vector_search(self.setting_document, prompt.replace("爱丽丝", ""), 1)
         # print("embedding" + knowledge)
         # construct query
-        query = self.construct_query(user_name, prompt, embedding=f"{knowledge}{self.preset}不要重复之前的回答，回答不要超过120个字。\n爱丽丝的状态栏：职业：勇者；经验值：0/100；生命值：1000；攻击力：100；持有的财富：100点信用积分；装备：“光之剑”（电磁炮）；持有的道具：['光之剑']。")
+        query = self.construct_query(user_name, prompt, embedding=f"{knowledge}{self.preset}不要重复之前的回答，回答不要超过80个字。\n爱丽丝的状态栏：职业：勇者；经验值：0/100；生命值：1000；攻击力：100；持有的财富：100点信用积分；装备：“光之剑”（电磁炮）；持有的道具：['光之剑']。")
 
         try:
             response = requests.post(url=self.api_ip_port, json=query)
@@ -154,6 +157,7 @@ class Qwen_alice:
                 thought = ret['choices'][0]['thought'].strip()
                 self.history = self.history + [
                     {"role": "assistant", "content": f"Thought: {thought}\nFinal Answer: {predictions}"}]
+                logging.info(f"\"role\": \"assistant\", \"content\": \"Thought: {thought}\nFinal Answer: {predictions}\"")
 
                 # 启用历史就给我记住！
                 if self.history_enable and not self.memory_clear_sign:
