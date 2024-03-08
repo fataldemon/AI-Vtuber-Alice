@@ -4,6 +4,7 @@ import json
 from hashlib import md5
 import traceback
 import logging
+from pygtrans import Translate
 
 from .common import Common
 from .logger import Configure_logger
@@ -19,14 +20,41 @@ class My_Translate:
         file_path = "./log/log-" + self.common.get_bj_time(1) + ".txt"
         Configure_logger(file_path)
 
+        self.config_data = self.config.get("translate")
         self.baidu_config = self.config.get("translate", "baidu")
+        self.google_config = self.config.get("translate", "google")
 
 
     # 重载config
     def reload_config(self, config_path):
         self.config = Config(config_path)
 
+    def trans(self, text, type=None) -> str:
+        """通用翻译调用此函数
+
+        Args:
+            text (str): 待翻译的文本
+            type (str): 翻译类型（baidu/google)
+
+        Returns:
+            (str)：翻译后的文本
+        """
+        if type is None:
+            type = self.config_data["type"]
+
+        # 是否启用字幕输出
+        if self.config.get("captions", "enable"):
+            # 输出当前播放的音频文件的文本内容到字幕文件中，就是保存翻译前的原文
+            self.common.write_content_to_file(self.config.get("captions", "raw_file_path"), text, write_log=False)
+
+        if type == "baidu":
+            return self.baidu_trans(text)
+        elif type == "google":
+            return self.google_trans(text)
+        else:
+            return self.google_trans(text)
         
+
     def baidu_trans(self, text):
         """百度翻译
 
@@ -40,8 +68,6 @@ class My_Translate:
         # Set your own appid/appkey.
         appid = self.baidu_config["appid"]
         appkey = self.baidu_config["appkey"]
-
-        captions_config = self.config.get("captions")
 
         # For list of language codes, please refer to `https://api.fanyi.baidu.com/doc/21`
         from_lang = self.baidu_config["from_lang"]
@@ -93,6 +119,36 @@ class My_Translate:
             return translation
             # Show response
             # print(json.dumps(result, indent=4, ensure_ascii=False))
+        except Exception as e:
+            logging.error(traceback.format_exc())
+
+            return None
+
+
+    def google_trans(self, text):
+        """谷歌翻译
+
+        Args:
+            text (str): 待翻译的文本
+
+        Return:
+            (str)：翻译后的文本
+        """
+        try:
+            if self.config_data['google']['proxy'] != "":
+                proxies = {'https': self.config_data['google']['proxy']}
+
+            client = Translate(proxies=proxies)
+
+            src_lang = self.config_data['google']['src_lang']
+            if src_lang == "auto":
+                src_lang = None
+
+            # 翻译句子
+            ret = client.translate(text, target=self.config_data['google']['tgt_lang'], source=src_lang)
+            logging.debug(ret)
+
+            return ret.translatedText
         except Exception as e:
             logging.error(traceback.format_exc())
 

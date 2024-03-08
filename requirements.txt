@@ -1,4 +1,6 @@
-git+https://github.com/Ikaros-521/WenxinWorkshop-Python-SDK
+requests
+git+https://gitee.com/ikaros-521/WenxinWorkshop-Python-SDK
+git+https://gitee.com/ikaros-521/blivedm
 openai
 pygame
 edge-tts==6.1.6
@@ -11,15 +13,10 @@ elevenlabs
 PyPDF2
 protobuf
 protobuf_inspector
-requests
 websocket-client
 websocket-client-py3
-langchain==0.0.142
-PyQt5
-pyqt5-tools
 tiktoken
 pyahocorasick
-requests
 webuiapi
 pyvirtualcam
 numpy
@@ -39,7 +36,7 @@ schedule
 bilibili-api-python
 langchain==0.0.142
 playwright
-protobuf
+protobuf==3.20.3
 certifi
 charset-normalizer
 greenlet
@@ -57,9 +54,7 @@ pyautogui
 nicegui
 pytchat
 PySocks
-blivedm
 pure-protobuf==3.0.0a5
-pyaudio
 flask
 flask_cors
 xingchen
@@ -70,3 +65,10 @@ colorlog
 faster_whisper
 httpx==0.25.2
 Pillow==10.1.0
+pygtrans
+jieba
+gradio==4.16.0
+TikTokLive
+azure-cognitiveservices-speech
+pyjwt
+dashscope

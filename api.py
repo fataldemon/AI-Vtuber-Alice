@@ -279,7 +279,7 @@ def start_server(config_path, sub_thread_exit_events):
             local_audio_path_list = load_data_list("local_audio")
 
             logging.debug(f"comment_copy_list={comment_copy_list}")
-            logging.info(f"local_audio_path_list={local_audio_path_list}")
+            logging.debug(f"local_audio_path_list={local_audio_path_list}")
 
             while True:
                 # 每隔一秒的睡眠进行闲时计数

@@ -512,6 +512,7 @@ class MY_TTS:
                 # 索引超出范围
                 return None
 
+        logging.debug(f"data={data}")
         data_str = data["request_parameters"]
         formatted_data_str = data_str.format(content=data["content"])
         data_json = json.loads(formatted_data_str)
@@ -545,7 +546,7 @@ class MY_TTS:
 
         async def websocket_client(data_json):
             try:
-                async with websockets.connect(data["api_ip_port"]) as websocket:
+                async with websockets.connect(data["ws_ip_port"]) as websocket:
                     # 设置最大连接时长（例如 30 秒）
                     return await asyncio.wait_for(websocket_client_logic(websocket, data_json), timeout=30)
             except asyncio.TimeoutError:
@@ -562,7 +563,7 @@ class MY_TTS:
                 if "msg" in data:
                     if data["msg"] == "send_hash":
                         # 发送响应消息
-                        response = json.dumps({"session_hash":"3obpzfqql7f","fn_index":0})
+                        response = json.dumps({"session_hash":"3obpzfqql7f","fn_index":3})
                         await websocket.send(response)
                         logging.debug(f"Sent message: {response}")
                     elif data["msg"] == "send_data":
@@ -573,7 +574,7 @@ class MY_TTS:
                         response = json.dumps(
                             {
                                 "session_hash":"3obpzfqql7f",
-                                "fn_index":0,
+                                "fn_index":3,
                                 "data":[
                                     {
                                         "data": file_to_data_url(audio_path),
@@ -582,7 +583,8 @@ class MY_TTS:
                                     data_json["prompt_text"], 
                                     data_json["prompt_language"], 
                                     data_json["content"], 
-                                    data_json["language"]
+                                    data_json["language"],
+                                    data_json["cut"]
                                 ]
                             }
                         )
@@ -594,15 +596,154 @@ class MY_TTS:
         try:
             logging.debug(f"data={data}")
             
-            # 调用函数并等待结果
-            voice_tmp_path = await websocket_client(data)
+            if data["type"] == "gradio":
+                # 调用函数并等待结果
+                voice_tmp_path = await websocket_client(data)
 
-            if voice_tmp_path:
-                new_file_path = self.common.move_file(voice_tmp_path, os.path.join(self.audio_out_path, 'gpt_sovits_' + self.common.get_bj_time(4)), 'gpt_sovits_' + self.common.get_bj_time(4))
+                if voice_tmp_path:
+                    new_file_path = self.common.move_file(voice_tmp_path, os.path.join(self.audio_out_path, 'gpt_sovits_' + self.common.get_bj_time(4)), 'gpt_sovits_' + self.common.get_bj_time(4))
 
-            return new_file_path
+                return new_file_path
+            elif data["type"] == "api":
+                try:
+                    data_json = {
+                        "refer_wav_path": data["ref_audio_path"],
+                        "prompt_text": data["prompt_text"],
+                        "prompt_language": data["prompt_language"],
+                        "text": data["content"],
+                        "text_language": data["language"]
+                    }
+                                        
+                    async with aiohttp.ClientSession() as session:
+                        async with session.post(data["api_ip_port"], json=data_json, timeout=self.timeout) as response:
+                            response = await response.read()
+                            
+                            file_name = 'gpt_sovits_' + self.common.get_bj_time(4) + '.wav'
+
+                            voice_tmp_path = self.common.get_new_audio_path(self.audio_out_path, file_name)
+
+                            with open(voice_tmp_path, 'wb') as f:
+                                f.write(response)
+
+                            return voice_tmp_path
+                except aiohttp.ClientError as e:
+                    logging.error(traceback.format_exc())
+                    logging.error(f'gpt_sovits请求失败: {e}')
+                except Exception as e:
+                    logging.error(traceback.format_exc())
+                    logging.error(f'gpt_sovits未知错误: {e}')
+            elif data["type"] == "webtts":
+                try:
+                    # 使用字典推导式构建 params 字典，只包含非空字符串的值
+                    params = {
+                        key: value
+                        for key, value in data["webtts"].items()
+                        if value != ""
+                        if key != "api_ip_port"
+                    }
+
+                    params["text"] = data["content"]
+                                        
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(data["webtts"]["api_ip_port"], params=params, timeout=self.timeout) as response:
+                            response = await response.read()
+                            
+                            file_name = 'gpt_sovits_' + self.common.get_bj_time(4) + '.wav'
+
+                            voice_tmp_path = self.common.get_new_audio_path(self.audio_out_path, file_name)
+
+                            with open(voice_tmp_path, 'wb') as f:
+                                f.write(response)
+
+                            return voice_tmp_path
+                except aiohttp.ClientError as e:
+                    logging.error(traceback.format_exc())
+                    logging.error(f'gpt_sovits请求失败: {e}')
+                except Exception as e:
+                    logging.error(traceback.format_exc())
+                    logging.error(f'gpt_sovits未知错误: {e}')
         except Exception as e:
             logging.error(traceback.format_exc())
             logging.error(f'gpt_sovits未知错误，请检查您的gpt_sovits推理是否启动/配置是否正确，报错内容: {e}')
         
         return None
+
+
+    async def clone_voice_api(self, data):
+        API_URL = urljoin(data["api_ip_port"], '/tts')
+
+        # voice=cn-nan.wav&text=%E4%BD%A0%E5%A5%BD&language=zh-cn&speed=1
+        params = {
+            "voice": data["voice"],
+            "language": data["language"],
+            "speed": data["speed"],
+            "text": data["content"]
+        }
+
+        logging.debug(f"params={params}")
+
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(API_URL, data=params) as response:
+                    ret = await response.json()
+                    logging.debug(ret)
+
+                    file_path = ret["filename"]
+
+                    return file_path
+
+        except aiohttp.ClientError as e:
+            logging.error(traceback.format_exc())
+            logging.error(f'clone_voice请求失败: {e}')
+        except Exception as e:
+            logging.error(traceback.format_exc())
+            logging.error(f'clone_voice未知错误: {e}')
+        
+        return None
+
+
+    def azure_tts_api(self, data):
+        """调用Azure TTS API合成音频返回音频路径
+
+        Args:
+            data (dict): JSON数据
+
+        Returns:
+            str: 音频路径
+        """
+        try:
+            import azure.cognitiveservices.speech as speechsdk
+
+            file_name = 'azure_tts_' + self.common.get_bj_time(4) + '.wav'
+            voice_tmp_path = self.common.get_new_audio_path(self.audio_out_path, file_name)
+            
+            # 创建语音配置对象，使用Azure订阅密钥和服务区域
+            speech_config = speechsdk.SpeechConfig(subscription=self.config.get("azure_tts", "subscription_key"), region=self.config.get("azure_tts", "region"))
+            speech_config.speech_synthesis_voice_name = self.config.get("azure_tts", "voice_name")
+
+            # 创建音频配置对象，指定输出音频文件路径
+            audio_config = speechsdk.audio.AudioOutputConfig(filename=voice_tmp_path)
+
+            # 创建语音合成器对象
+            speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=audio_config)
+
+            # 执行文本到语音的转换
+            result = speech_synthesizer.speak_text_async(data["content"]).get()
+
+            # 检查结果
+            if result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
+                logging.debug(f"音频已成功保存到: {voice_tmp_path}")
+                return voice_tmp_path
+            elif result.reason == speechsdk.ResultReason.Canceled:
+                cancellation_details = result.cancellation_details
+                logging.error(f"文本转语音取消: {str(cancellation_details.reason)}")
+                if cancellation_details.reason == speechsdk.CancellationReason.Error:
+                    if cancellation_details.error_details:
+                        logging.error(f"错误详情: {str(cancellation_details.error_details)}")
+
+                return None
+        except Exception as e:
+            logging.error(traceback.format_exc())
+            logging.error(f'azure_tts未知错误: {e}')
+
+            return None

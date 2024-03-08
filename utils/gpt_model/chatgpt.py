@@ -49,6 +49,9 @@ class Chatgpt:
             # 调用 ChatGPT 接口生成回复消息
             message = self.chat_with_gpt(session['msg'])
 
+            if message is None:
+                return None
+
             # 如果返回的消息包含最大上下文长度限制，则删除超长上下文并重试
             if message.__contains__("This model's maximum context length is 409"):
                 del session['msg'][0:3]

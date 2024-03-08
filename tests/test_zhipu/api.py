@@ -1,5 +1,13 @@
 import zhipuai
 import logging
+import time
+import jwt  # 确保这是 PyJWT 库
+import requests
+import traceback
+from urllib.parse import urljoin
+
+# from utils.common import Common
+# from utils.logger import Configure_logger
 
 
 class Zhipu:
@@ -8,6 +16,8 @@ class Zhipu:
         # 日志文件路径
         # file_path = "./log/log-" + self.common.get_bj_time(1) + ".txt"
         # Configure_logger(file_path)
+
+        self.config_data = data
 
         zhipuai.api_key = data["api_key"]
         self.model = data["model"]
@@ -21,8 +31,44 @@ class Zhipu:
         self.bot_name = data["bot_name"]
         self.user_name = data["user_name"]
 
+        # 非SDK
+        self.base_url = "https://open.bigmodel.cn"
+        self.token = None
+        self.headers = None
+        if self.model == "应用":
+            try:
+                self.token = self.generate_token(apikey=self.config_data["api_key"], exp_seconds=30 * 24 * 3600)
+
+                self.headers = {
+                    "Authorization": f"Bearer {self.token}",
+                }
+
+                url = urljoin(self.base_url, "/api/llm-application/open/application")
+
+                data = {
+                    "page": 1,
+                    "size": 100
+                }
+
+                # get请求
+                response = requests.get(url=url, data=data, headers=self.headers)
+
+                logging.debug(response.json())
+
+                resp_json = response.json()
+
+                tmp_content = "智谱应用列表："
+            
+                for data in resp_json["data"]["list"]:
+                    tmp_content += f"\n应用名：{data['name']}，应用ID：{data['id']}，知识库：{data['knowledge_ids']}"
+
+                logging.info(tmp_content)
+            except Exception as e:
+                logging.error(traceback.format_exc())
+
         self.history = []
 
+    # 进行智谱AI 通用大模型请求
     def invoke_example(self, prompt):
         response = zhipuai.model_api.invoke(
             model=self.model,
@@ -34,6 +80,7 @@ class Zhipu:
 
         return response
     
+    # 进行characterglm请求
     def invoke_characterglm(self, prompt):
         response = zhipuai.model_api.invoke(
             model=self.model,
@@ -50,6 +97,7 @@ class Zhipu:
         logging.info(response)
 
         return response
+
 
     def async_invoke_example(self, prompt):
         response = zhipuai.model_api.async_invoke(
@@ -96,6 +144,28 @@ class Zhipu:
 
         return response
 
+    # 非SDK鉴权
+    def generate_token(self, apikey: str, exp_seconds: int):
+        try:
+            id, secret = apikey.split(".")
+        except Exception as e:
+            raise Exception("invalid apikey", e)
+
+        payload = {
+            "api_key": id,
+            "exp": int(round(time.time())) + exp_seconds,  # PyJWT中exp字段期望的是秒级的时间戳
+            "timestamp": int(round(time.time() * 1000)),  # 如果需要毫秒级时间戳，可以保留这一行
+        }
+
+        # 使用PyJWT编码payload
+        token = jwt.encode(
+            payload,
+            secret,
+            headers={"alg": "HS256", "sign_type": "SIGN"}
+        )
+
+        return token
+
 
     def get_resp(self, prompt):
         """请求对应接口，获取返回值
@@ -117,13 +187,61 @@ class Zhipu:
 
             if self.model == "characterglm":
                 ret = self.invoke_characterglm(data_json)
+            elif self.model == "应用":
+                url = urljoin(self.base_url, f"/api/llm-application/open/model-api/{self.config_data['app_id']}/invoke")
+
+                self.history.append({"role": "user", "content": prompt})
+                data = {
+                    "prompt": self.history,
+                    "returnType": "json_string",
+                    # "knowledge_ids": [],
+                    # "document_ids": []
+                }
+
+                response = requests.post(url=url, json=data, headers=self.headers)
+
+                try:
+                    resp_json = response.json()
+
+                    logging.debug(resp_json)
+
+                    resp_content = resp_json["data"]["content"]
+
+                    # 启用历史就给我记住！
+                    if self.history_enable:
+                        # 把机器人回答添加到历史记录中
+                        self.history.append({"role": "assistant", "content": resp_content})
+
+                        while True:
+                            # 获取嵌套列表中所有字符串的字符数
+                            total_chars = sum(len(string) for sublist in self.history for string in sublist)
+                            # 如果大于限定最大历史数，就剔除第1 2个元素
+                            if total_chars > self.history_max_len:
+                                self.history.pop(0)
+                                self.history.pop(0)
+                            else:
+                                break
+
+                    return resp_content
+                except Exception as e:
+                    def is_odd(number):
+                        # 检查数除以2的余数是否为1
+                        return number % 2 != 0
+                    
+                    # 保持history始终为偶数个
+                    if is_odd(len(self.history)):
+                        self.history.pop(0)
+
+                    logging.error(traceback.format_exc())
+                    return None
+                
             else:
                 ret = self.invoke_example(data_json)
 
             logging.debug(f"ret={ret}")
 
             if False == ret['success']:
-                logging.error(f"请求zhipuai失败，错误代码：{ret['code']}，{ret['msg']}")
+                logging.error(f"请求智谱ai失败，错误代码：{ret['code']}，{ret['msg']}")
                 return None
 
             # 启用历史就给我记住！
@@ -140,7 +258,7 @@ class Zhipu:
 
             return ret['data']['choices'][0]['content']
         except Exception as e:
-            logging.error(e)
+            logging.error(traceback.format_exc())
             return None
 
 
@@ -154,6 +272,7 @@ if __name__ == '__main__':
 
     data = {
         "api_key": "",
+        "app_id": "1761340125461340161",
         # chatglm_pro/chatglm_std/chatglm_lite/characterglm
         "model": "characterglm",
         "top_p": 0.7,

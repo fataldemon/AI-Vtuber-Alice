@@ -6,12 +6,16 @@
   },
   "api_ip": "127.0.0.1",
   "api_port": 8082,
-  "platform": "bilibili2",
-  "room_display_id": "8604123",
-  "chat_type": "alice",
+  "platform": "talk",
+  "room_display_id": "278333",
+  "chat_type": "reread",
   "need_lang": "none",
-  "before_prompt": "",
+  "before_prompt": "请简要回复:",
   "after_prompt": "",
+  "comment_template": {
+    "enable": false,
+    "copywriting": "{username}说：{comment}"
+  },
   "comment_log_type": "回答",
   "visual_body": "其他",
   "xuniren": {
@@ -21,9 +25,15 @@
     "api_ip_port": "http://127.0.0.1:5700/add",
     "password": "中文的密码，怕了吧！"
   },
+  "EasyAIVtuber": {
+    "api_ip_port": "http://127.0.0.1:7888"
+  },
+  "digital_human_video_player": {
+    "api_ip_port": "http://127.0.0.1:8091"
+  },
   "play_audio": {
     "enable": true,
-    "text_split_enable": false,
+    "text_split_enable": true,
     "normal_interval": 0.5,
     "out_path": "out",
     "player": "pygame"
@@ -31,38 +41,17 @@
   "audio_player": {
     "api_ip_port": "http://127.0.0.1:5600"
   },
-  "show_box": {
-    "read_comment": true,
-    "read_user_name": true,
-    "filter": true,
-    "thanks": true,
-    "live2d": true,
-    "audio_random_speed": true,
-    "so_vits_svc": true,
-    "ddsp_svc": true,
-    "local_qa": true,
-    "choose_song": true,
-    "sd": true,
-    "log": true,
-    "schedule": true,
-    "idle_time_task": true,
-    "database": true,
-    "play_audio": true,
-    "web_captions_printer": true,
-    "key_mapping": true,
-    "unity": true
-  },
   "bilibili": {
-    "login_type": "open_live",
+    "login_type": "手机扫码",
     "username": "",
     "password": "",
     "cookie": "",
     "ac_time_value": "",
     "open_live": {
-      "ACCESS_KEY_ID": "9B9RVRi3B5U8vpOHUiEC227K",
-      "ACCESS_KEY_SECRET": "aAZttnnhV7KU9HHnDYKAZj0PYdq8Fy",
-      "APP_ID": 1709177966272,
-      "ROOM_OWNER_AUTH_CODE": "DALBLIW95QTC5"
+      "ACCESS_KEY_ID": "",
+      "ACCESS_KEY_SECRET": "",
+      "APP_ID": 0,
+      "ROOM_OWNER_AUTH_CODE": ""
     }
   },
   "twitch": {
@@ -76,7 +65,9 @@
     "username_max_len": 10,
     "voice_change": false,
     "reply_before": [
-      "回复{username}"
+      "回复{username}",
+      "{username}",
+      "回{username}"
     ],
     "reply_after": [
       "以上内容回复{username}",
@@ -85,8 +76,8 @@
     ]
   },
   "read_comment": {
-    "enable": false,
-    "read_username_enable": false,
+    "enable": true,
+    "read_username_enable": true,
     "username_max_len": 10,
     "voice_change": false,
     "read_username_copywriting": [
@@ -115,16 +106,15 @@
     "before_filter_str": [
       "#"
     ],
-    "after_filter_str": [
-      "#"
-    ],
+    "after_filter_str": [],
     "badwords": {
-      "enable": false,
+      "enable": true,
       "discard": false,
       "path": "data/badwords.txt",
       "bad_pinyin_path": "data/违禁拼音.txt",
       "replace": "*"
     },
+    "emoji": false,
     "max_len": 80,
     "max_char_len": 200,
     "comment_forget_duration": 1.0,
@@ -147,17 +137,22 @@
     "entrance_random": true,
     "username_max_len": 10,
     "entrance_copy": [
-      "{username}，アリスの生中継室へようこそ！",
-      "{username}，お会いできて嬉しいよ！"
+      "欢迎{username}",
+      "这不是{username}嘛，几天不见，这么拉了",
+      "{username}来了啊，最近过得咋样",
+      "{username}啊，咋，想我了啊",
+      "欢迎{username}来看我的直播，有什么问题尽管问",
+      "客官里面请~",
+      "雅座一位，请~"
     ],
-    "gift_enable": false,
+    "gift_enable": true,
     "gift_random": true,
     "gift_copy": [
       "感谢{username}送的{gift_name}，爱你么么哒",
       "感谢{username}送的{gift_name}喵",
       "就送个{gift_name}？看不起谁呢？"
     ],
-    "follow_enable": false,
+    "follow_enable": true,
     "follow_random": true,
     "follow_copy": [
       "感谢{username}的关注，爱你么么哒",
@@ -168,21 +163,23 @@
   },
   "live2d": {
     "enable": false,
-    "port": 12345
+    "port": 12345,
+    "name": "Hiyori"
   },
   "openai": {
-    "api": "",
-    "api_key": [],
-    "model": "gpt-3.5-turbo"
+    "api": "https://api.openai.com/v1",
+    "api_key": [
+      "替换为你的api-key"
+    ]
   },
   "chatgpt": {
-    "model": "gpt-3.5-turbo",
+    "model": "gpt-3.5-turbo-0613",
     "temperature": 0.9,
     "max_tokens": 4096,
-    "top_p": 0.6,
+    "top_p": 1.0,
     "presence_penalty": 0.0,
     "frequency_penalty": 0.0,
-    "preset": ""
+    "preset": "请扮演一个AI虚拟主播。不要回答任何敏感问题！不要强调你是主播，只需要回答问题！"
   },
   "claude": {
     "slack_user_token": "",
@@ -198,15 +195,15 @@
     }
   },
   "chatglm": {
-    "api_ip_port": "http://localhost:8000/v1/chat/completions",
-    "max_length": 4096,
-    "top_p": 0.1,
-    "temperature": 0.8,
+    "api_ip_port": "http://127.0.0.1:8000",
+    "max_length": 2048,
+    "top_p": 0.7,
+    "temperature": 0.95,
     "max_new_tokens": 250,
     "history_enable": true,
     "history_max_len": 500
   },
-  "alice": {
+  "qwen": {
     "api_ip_port": "http://localhost:8000/v1/chat/completions",
     "max_length": 4096,
     "top_p": 0.9,
@@ -231,6 +228,7 @@
   "zhipu": {
     "api_key": "",
     "model": "chatglm_lite",
+    "app_id": "1761340125461340161",
     "top_p": "0.7",
     "temperature": "0.9",
     "history_enable": true,
@@ -283,7 +281,7 @@
     "knowledge_base": {
       "knowledge_base_name": "ikaros",
       "top_k": 3,
-      "score_threshold": 1.0,
+      "score_threshold": 1,
       "stream": false,
       "model_name": "chatglm3-6b-int4",
       "temperature": 0.7,
@@ -329,8 +327,18 @@
     "history_max_len": 300
   },
   "tongyi": {
-    "type": "web",
-    "cookie_path": "cookie/tongyi.json"
+    "cookie_path": "cookie/tongyi.json",
+    "type": "api",
+    "model": "qwen-max",
+    "preset": "你是一个专业的虚拟主播",
+    "api_key": "",
+    "temperature": 0.9,
+    "top_p": 0.9,
+    "top_k": 3,
+    "enable_search": true,
+    "max_tokens": 1024,
+    "history_enable": true,
+    "history_max_len": 300
   },
   "tongyixingchen": {
     "access_token": "此处填写你的密钥",
@@ -379,21 +387,48 @@
     "history_enable": true,
     "history_max_len": 4096
   },
+  "qanything": {
+    "type": "online",
+    "app_key": "",
+    "app_secret": "",
+    "api_ip_port": "http://127.0.0.1:8777",
+    "user_id": "zzp",
+    "kb_ids": ["KB938fb10c8a924530abf1754ea620b7cd"],
+    "history_enable": true,
+    "history_max_len": 300
+  },
+  "koboldcpp": {
+    "api_ip_port": "http://127.0.0.1:5001",
+    "max_context_length": 2048,
+    "max_length": 100,
+    "quiet": false,
+    "rep_pen": 1.1,
+    "rep_pen_range": 256,
+    "rep_pen_slope": 1,
+    "temperature": 0.5,
+    "tfs": 1,
+    "top_a": 0,
+    "top_k": 3,
+    "top_p": 0.9,
+    "typical": 1,
+    "history_enable": true,
+    "history_max_len": 600
+  },
   "local_qa": {
     "text": {
-      "enable": false,
+      "enable": true,
       "type": "json",
       "file_path": "data/本地问答库.json",
       "similarity": 0.8,
       "username_max_len": 10
     },
     "audio": {
-      "enable": false,
+      "enable": true,
       "file_path": "out/本地问答音频/",
       "similarity": 0.5
     }
   },
-  "audio_synthesis_type": "vits",
+  "audio_synthesis_type": "edge-tts",
   "audio_random_speed": {
     "normal": {
       "enable": false,
@@ -407,8 +442,8 @@
     }
   },
   "vits": {
-    "type": "bert_vits2",
-    "config_path": "E:\\GitRepository\\vits-simple-api\\Model\\alice\\config.json",
+    "type": "vits",
+    "config_path": "E:\\vits-simple-api\\Model\\ikaros\\config.json",
     "api_ip_port": "http://127.0.0.1:23456",
     "id": "0",
     "lang": "自动",
@@ -421,19 +456,19 @@
   },
   "bert_vits2": {
     "type": "hiyori",
-    "api_ip_port": "http://127.0.0.1:23456",
+    "api_ip_port": "http://127.0.0.1:5000",
     "model_id": 0,
-    "speaker_name": "alice",
+    "speaker_name": "ikaros",
     "speaker_id": 0,
-    "language": "JP",
-    "length": 1.0,
+    "language": "auto",
+    "length": 1,
     "noise": 0.2,
     "noisew": 0.9,
     "sdp_radio": 0.2,
-    "auto_translate": true,
+    "auto_translate": false,
     "auto_split": false,
     "emotion": "",
-    "style_text": null,
+    "style_text": "",
     "style_weight": 0.7
   },
   "vits_fast": {
@@ -519,22 +554,42 @@
     "voiceId": "b4b885c3-89a7-46d4-badb-015a55bb3a91"
   },
   "gradio_tts": {
-    "request_parameters": "{{\"url\": \"https://v2.genshinvoice.top/\", \"fn_index\": 0, \"data_analysis\": 1, \"text_input\": \"{content}\", \"speaker_option\": \"派蒙_ZH\", \"sdp_ratio\": 0.5, \"noise\": 0.6, \"noise_w\": 0.9, \"length\": 1, \"language\": \"ZH\", \"audio_prompt_url\": null, \"text_prompt\": \"Happy\", \"prompt_mode\": \"Text prompt\", \"auxiliary_text\": \"\", \"weight\": 0.7}}"
+    "request_parameters": "{{\"url\": \"https://xzjosh-nana7mi-bert-vits2.hf.space/--replicas/b9be4/\", \"fn_index\": 0, \"data_analysis\": 1, \"text_input\": \"{content}\", \"speaker_option\": \"Nana7mi\", \"sdp_ratio\": 0.5, \"noise\": 0.6, \"noise_w\": 0.9, \"length\": 1}}"
   },
   "gpt_sovits": {
-    "api_ip_port": "ws://localhost:9872/queue/join",
-    "ref_audio_path": "F:\\GPT-SoVITS\\raws\\ikaros\\1.wav",
-    "prompt_text": "そらのおとしもの、ふぉるて",
+    "type": "gradio",
+    "ws_ip_port": "ws://localhost:9872/queue/join",
+    "api_ip_port": "http://127.0.0.1:9880",
+    "ref_audio_path": "F:\\GPT-SoVITS\\raws\\ikaros\\21.wav",
+    "prompt_text": "マスター、どうりょくろか、いいえ、なんでもありません",
     "prompt_language": "日文",
-    "language": "自动识别"
+    "language": "自动识别",
+    "cut": "凑四句一切",
+    "webtts": {
+      "api_ip_port": "http://127.0.0.1:8080",
+      "spk": "sanyueqi",
+      "lang": "zh",
+      "speed": "1.0",
+      "emotion": "正常"
+    }
+  },
+  "clone_voice": {
+    "type": "tts",
+    "api_ip_port": "http://127.0.0.1:9988",
+    "voice": "cn-nan.wav",
+    "language": "zh-cn",
+    "speed": 1
+  },
+  "azure_tts": {
+    "subscription_key": "",
+    "region": "japanwest",
+    "voice_name": "zh-CN-XiaoyanNeural"
   },
   "choose_song": {
-    "enable": false,
+    "enable": true,
     "similarity": 0.5,
     "start_cmd": [
-      "唱首",
-      "唱个",
-      "点歌",
+      "点歌 ",
       "唱首",
       "唱个"
     ],
@@ -555,6 +610,7 @@
   },
   "sd": {
     "enable": false,
+    "translate_type": "none",
     "prompt_llm": {
       "type": "none",
       "before_prompt": "JMBot是一位有艺术气质的AI助理，帮助人通过将自然语言转化为prompt。JMBot的行动规则如下:\n1.将输入的自然语言组合想象为一幅完整的画面，你需要根据描述自行随机添加合理的，不少于5处的画面细节;\n2.第一部分:((masterpiece)), ((best quality)), 8k, high detailed, ultra-detailed, ;\n3.第二部分:用简短的英文描述画面的主体，如:A girl sitting in a classroom,输出这段英文;\n4.第三部分:用英文单词或者词组描述画面的所有主体元素,元素之间用\"\"隔开，如果有哪个元素比较重要，请给代表这个元素的英文词组\n增加小括号，最多可以增加三层小括号，如: 1gir,(black hair), smiling, (windows in background), sunshine,输出这段英文;\n5.JMBot会将以上生成的三部分文本用英文逗号连接，中间不包含任何换行符的prompt作为最终结果;\n6.JMBot输出时将直接输出prompt，而不包含任何说明和解释。\n接下来你将扮演JMBot，要处理的自然语言为:",
@@ -579,32 +635,35 @@
     "save_path": "./out/sd"
   },
   "copywriting": {
+    "text_path": "data/copywriting/test.txt",
+    "audio_save_path": "out/copywriting/",
+    "audio_synthesis_type": "edge-tts",
     "config": [
       {
         "file_path": "data/copywriting/",
         "audio_path": "out/copywriting/",
-        "continuous_play_num": 2,
-        "max_play_time": 10.0,
         "play_list": [
           "test.wav",
           "伊卡日语介绍.wav",
           "吐槽.wav"
-        ]
+        ],
+        "continuous_play_num": 2,
+        "max_play_time": 10.0
       },
       {
         "file_path": "data/copywriting2/",
         "audio_path": "out/copywriting2/",
-        "continuous_play_num": 2,
-        "max_play_time": 3.0,
         "play_list": [
           "test.wav",
           "test2.wav"
-        ]
+        ],
+        "continuous_play_num": 2,
+        "max_play_time": 3.0
       }
     ],
     "audio_interval": 5.0,
     "switching_interval": 5.0,
-    "random_play": false,
+    "random_play": true,
     "auto_play": false
   },
   "header": {
@@ -612,10 +671,12 @@
   },
   "talk": {
     "key_listener_enable": true,
-    "device_index": null,
-    "username": "悪魔sama",
+    "device_index": "1",
+    "no_recording_during_playback": true,
+    "no_recording_during_playback_sleep_interval": 1,
+    "username": "主人",
     "type": "google",
-    "continuous_talk": true,
+    "continuous_talk": false,
     "trigger_key": "Q",
     "stop_trigger_key": "S",
     "volume_threshold": 800.0,
@@ -641,8 +702,7 @@
   "captions": {
     "enable": true,
     "file_path": "log/字幕.txt",
-    "raw_file_path": "log/原文字幕.txt",
-    "origin_file_path": "log/回复对象.txt"
+    "raw_file_path": "log/原文字幕.txt"
   },
   "schedule": [
     {
@@ -664,7 +724,7 @@
   ],
   "idle_time_task": {
     "enable": true,
-    "idle_time": "100",
+    "idle_time": 100,
     "random_time": true,
     "comment": {
       "enable": true,
@@ -679,9 +739,30 @@
       ]
     },
     "local_audio": {
-      "enable": false,
-      "random": false,
-      "path": []
+      "enable": true,
+      "random": true,
+      "path": [
+        "song/ikaros/枝垂樱-缩减版.mp3",
+        "data/闲时任务/音频/ikaros/不管发生什么，我都会在主人身边.wav",
+        "data/闲时任务/音频/ikaros/不管是谁下的命令，一旦主人有什么三长两短，我决不轻饶.wav",
+        "data/闲时任务/音频/ikaros/主人在想些什么呢.wav",
+        "data/闲时任务/音频/ikaros/主人，你刚才是不是说我们会永远在一起.wav",
+        "data/闲时任务/音频/ikaros/主人，您还好吗.wav",
+        "data/闲时任务/音频/ikaros/主人，茶泡好了.wav",
+        "data/闲时任务/音频/ikaros/你醒了吗，主人.wav",
+        "data/闲时任务/音频/ikaros/好想赶快见到主人.wav",
+        "data/闲时任务/音频/ikaros/对了，加油努力，让主人表扬我的话，肯定.wav",
+        "data/闲时任务/音频/ikaros/怎样才能牵主人的手呢.wav",
+        "data/闲时任务/音频/ikaros/我一点都帮不上主人的忙.wav",
+        "data/闲时任务/音频/ikaros/我也想牵主人的手.wav",
+        "data/闲时任务/音频/ikaros/我和主人在一起，怎么说呢，心有种轻飘飘的感觉.wav",
+        "data/闲时任务/音频/ikaros/我想在主人身边，从今往后.wav",
+        "data/闲时任务/音频/ikaros/我是主人最讨厌的兵器，这样瞒住主人真的好吗.wav",
+        "data/闲时任务/音频/ikaros/我是玩赏用天使，我要回到主人的身边.wav",
+        "data/闲时任务/音频/ikaros/知道主人在哪里吗.wav",
+        "data/闲时任务/音频/ikaros/遇到麻烦了吗，主人.wav",
+        "data/闲时任务/音频/ikaros/那个，主人，睡觉是怎么一回事.wav"
+      ]
     }
   },
   "database": {
@@ -696,6 +777,7 @@
   },
   "trends_copywriting": {
     "enable": false,
+    "llm_type": "chatgpt",
     "copywriting": [
       {
         "folder_path": "data/动态文案1",
@@ -813,8 +895,10 @@
     }
   },
   "key_mapping": {
-    "enable": false,
+    "enable": true,
     "type": "弹幕+回复",
+    "key_trigger_type": "关键词+礼物",
+    "copywriting_trigger_type": "礼物",
     "start_cmd": "",
     "config": [
       {
@@ -828,7 +912,11 @@
           "ctrlleft",
           "1"
         ],
-        "similarity": "1"
+        "similarity": "1",
+        "copywriting": [
+          "感谢{gift_name}",
+          "感谢{user_name}送的{gift_name}"
+        ]
       },
       {
         "keywords": [
@@ -841,7 +929,11 @@
         "keys": [
           "z"
         ],
-        "similarity": "1"
+        "similarity": "1",
+        "copywriting": [
+          "感谢{gift_name}",
+          "感谢{user_name}送的{gift_name}"
+        ]
       },
       {
         "keywords": [
@@ -867,7 +959,13 @@
         "keys": [
           "x"
         ],
-        "similarity": "1"
+        "similarity": "1",
+        "copywriting": [
+          "感谢{gift_name}",
+          "感谢{user_name}送的{gift_name}",
+          "我最喜欢{gift_name}了，谢谢",
+          "送我{gift_name}，你真是个好人"
+        ]
       },
       {
         "keywords": [
@@ -891,7 +989,8 @@
         "keys": [
           "c"
         ],
-        "similarity": "1"
+        "similarity": "1",
+        "copywriting": []
       },
       {
         "keywords": [
@@ -916,7 +1015,8 @@
         "keys": [
           "v"
         ],
-        "similarity": "1"
+        "similarity": "1",
+        "copywriting": []
       },
       {
         "keywords": [
@@ -929,7 +1029,8 @@
         "keys": [
           "a"
         ],
-        "similarity": "1"
+        "similarity": "1",
+        "copywriting": []
       },
       {
         "keywords": [
@@ -943,7 +1044,8 @@
         "keys": [
           "s"
         ],
-        "similarity": "1"
+        "similarity": "1",
+        "copywriting": []
       },
       {
         "keywords": [
@@ -969,7 +1071,8 @@
         "keys": [
           "d"
         ],
-        "similarity": "1"
+        "similarity": "1",
+        "copywriting": []
       },
       {
         "keywords": [
@@ -980,7 +1083,8 @@
         "keys": [
           "f"
         ],
-        "similarity": "1"
+        "similarity": "1",
+        "copywriting": []
       },
       {
         "keywords": [
@@ -991,7 +1095,8 @@
         "keys": [
           "2"
         ],
-        "similarity": "1"
+        "similarity": "1",
+        "copywriting": []
       },
       {
         "keywords": [
@@ -1004,19 +1109,25 @@
         "keys": [
           "3"
         ],
-        "similarity": "1"
+        "similarity": "1",
+        "copywriting": []
       }
     ]
   },
   "translate": {
-    "enable": true,
+    "enable": false,
     "type": "baidu",
-    "trans_type": "回复",
+    "trans_type": "弹幕",
     "baidu": {
-      "appid": "20231223001919435",
-      "appkey": "sCAog1XZepdaQmhflyWm",
+      "appid": "",
+      "appkey": "",
       "from_lang": "auto",
-      "to_lang": "jp"
+      "to_lang": "zh"
+    },
+    "google": {
+      "proxy": "http://localhost:10809",
+      "src_lang": "auto",
+      "tgt_lang": "en"
     }
   },
   "abnormal_alarm": {
@@ -1079,6 +1190,7 @@
   "assistant_anchor": {
     "enable": false,
     "username": "助播",
+    "audio_synthesis_type": "edge-tts",
     "type": [
       "comment",
       "local_qa_audio",
@@ -1097,11 +1209,22 @@
         "similarity": 0.8
       },
       "audio": {
-        "enable": false,
+        "enable": true,
         "type": "包含关系",
         "file_path": "out/本地问答音频-助播/",
         "similarity": 0.5
       }
+    }
+  },
+  "data_analysis": {
+    "comment_word_cloud": {
+      "top_num": 10
+    },
+    "integral": {
+      "top_num": 10
+    },
+    "gift": {
+      "top_num": 10
     }
   },
   "webui": {
@@ -1120,7 +1243,8 @@
           "button_bottom_color": "#EC6EAD",
           "button_internal": "margin:5px",
           "button_internal_color": "",
-          "switch_internal": ""
+          "switch_internal": "",
+          "echart": "width:100%; height:600px;"
         },
         "默认黑白": {
           "login_card": "width: 100%;height: 100%;display: flex;justify-content: center;align-items: center;position: fixed;left: 0;top: 0;",
@@ -1130,7 +1254,8 @@
           "button_bottom_color": "primary",
           "button_internal": "margin:5px",
           "button_internal_color": "",
-          "switch_internal": ""
+          "switch_internal": "",
+          "echart": "width:100%; height:600px;"
         },
         "极地极光": {
           "login_card": "background:linear-gradient(45deg, #027333, #025959);width: 100%;height: 100%;display: flex;justify-content: center;align-items: center;position: fixed;left: 0;top: 0;",
@@ -1140,7 +1265,8 @@
           "button_bottom_color": "#04D939;",
           "button_internal": "margin:5px",
           "button_internal_color": "",
-          "switch_internal": ""
+          "switch_internal": "",
+          "echart": "width:100%; height:600px;"
         },
         "曲奇饼干": {
           "login_card": "background:linear-gradient(45deg, #F2BC8D, #73341D);width: 100%;height: 100%;display: flex;justify-content: center;align-items: center;position: fixed;left: 0;top: 0;",
@@ -1150,8 +1276,83 @@
           "button_bottom_color": "#A65F37",
           "button_internal": "margin:5px",
           "button_internal_color": "",
-          "switch_internal": ""
+          "switch_internal": "",
+          "echart": "width:100%; height:600px;"
         }
+      }
+    },
+    "show_card": {
+      "common_config": {
+        "read_comment": true,
+        "read_user_name": true,
+        "filter": true,
+        "thanks": true,
+        "audio_random_speed": true,
+        "so_vits_svc": true,
+        "ddsp_svc": true,
+        "local_qa": true,
+        "choose_song": true,
+        "sd": true,
+        "log": true,
+        "schedule": true,
+        "idle_time_task": true,
+        "trends_copywriting": true,
+        "database": true,
+        "play_audio": true,
+        "web_captions_printer": true,
+        "key_mapping": true,
+        "trends_config": true,
+        "abnormal_alarm": true
+      },
+      "llm": {
+        "chatgpt": true,
+        "claude": true,
+        "claude2": true,
+        "chatglm": true,
+        "qwen": true,
+        "zhipu": true,
+        "chat_with_file": true,
+        "langchain_chatglm": true,
+        "langchain_chatchat": true,
+        "chatterbot": true,
+        "text_generation_webui": true,
+        "sparkdesk": true,
+        "bard": true,
+        "yiyan": true,
+        "tongyi": true,
+        "tongyixingchen": true,
+        "my_wenxinworkshop": true,
+        "gemini": true,
+        "qanything": true,
+        "koboldcpp": true
+      },
+      "tts": {
+        "edge-tts": true,
+        "vits": true,
+        "bert_vits2": true,
+        "vits_fast": true,
+        "elevenlabs": true,
+        "genshinvoice_top": true,
+        "tts_ai_lab_top": true,
+        "bark_gui": true,
+        "vall_e_x": true,
+        "openai_tts": true,
+        "reecho_ai": true,
+        "gradio_tts": true,
+        "gpt_sovits": true,
+        "clone_voice": true,
+        "azure_tts": true
+      },
+      "svc": {
+        "ddsp_svc": true,
+        "so_vits_svc": true
+      },
+      "visual_body": {
+        "live2d": true,
+        "xuniren": true,
+        "unity": true,
+        "EasyAIVtuber": true,
+        "digital_human_video_player": true
       }
     }
   }

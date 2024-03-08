@@ -10,7 +10,7 @@
 import logging
 
 from utils.gpt_model.chatglm import Chatglm
-from utils.gpt_model.alice import Qwen_alice
+from utils.gpt_model.qwen import Qwen
 from utils.gpt_model.chatgpt import Chatgpt
 from utils.gpt_model.claude import Claude
 from utils.gpt_model.claude2 import Claude2
@@ -26,6 +26,8 @@ from utils.gpt_model.tongyixingchen import TongYiXingChen
 from utils.gpt_model.my_qianfan import My_QianFan
 from utils.gpt_model.my_wenxinworkshop import My_WenXinWorkShop
 from utils.gpt_model.gemini import Gemini
+from utils.gpt_model.qanything import QAnything
+from utils.gpt_model.koboldcpp import Koboldcpp
 
 class GPT_Model:
     openai = None
@@ -35,7 +37,7 @@ class GPT_Model:
             "claude": Claude,
             "claude2": Claude2,
             "chatglm": Chatglm,
-            "alice": Qwen_alice,
+            "qwen": Qwen,
             "text_generation_webui": TEXT_GENERATION_WEBUI,
             "sparkdesk": SPARKDESK,
             "langchain_chatglm": Langchain_ChatGLM,
@@ -47,7 +49,9 @@ class GPT_Model:
             "tongyixingchen": TongYiXingChen,
             "my_wenxinworkshop": My_WenXinWorkShop,
             "my_qianfan": My_QianFan,
-            "gemini": Gemini
+            "gemini": Gemini,
+            "qanything": QAnything,
+            "koboldcpp": Koboldcpp,
         }
 
         if model_name == "openai":
@@ -64,7 +68,8 @@ class GPT_Model:
     def get(self, name):
         logging.info("GPT_MODEL: 进入get方法")
         try:
-            return getattr(self, name)
+            if name != "reread":
+                return getattr(self, name)
         except AttributeError:
             logging.warning(f"{name} 该模型不支持，如果不是LLM的类型，那就只是个警告，可以正常使用，请放心")
             return None

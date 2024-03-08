@@ -6,6 +6,7 @@ import traceback
 import importlib
 import pyautogui
 import copy
+import re
 
 from .config import Config
 from .common import Common
@@ -41,6 +42,9 @@ class My_handle(metaclass=SingletonMeta):
     config = None
     audio = None
     my_translate = None
+
+    # 是否在数据处理中
+    is_handleing = 0
 
     abnormal_alarm_data = {
         "platform": {
@@ -113,7 +117,7 @@ class My_handle(metaclass=SingletonMeta):
             self.claude = None
             self.claude2 = None
             self.chatglm = None
-            self.alice = None
+            self.qwen = None
             self.chat_with_file = None
             self.text_generation_webui = None
             self.sparkdesk = None
@@ -127,6 +131,12 @@ class My_handle(metaclass=SingletonMeta):
             self.my_qianfan = None
             self.my_wenxinworkshop = None
             self.gemini = None
+            self.qanything = None
+            self.koboldcpp = None
+
+            self.chat_type_list = ["chatgpt", "claude", "claude2", "chatglm", "qwen", "chat_with_file", "text_generation_webui", \
+                    "sparkdesk", "langchain_chatglm", "langchain_chatchat", "zhipu", "bard", "yiyan", "tongyi", \
+                    "tongyixingchen", "my_qianfan", "my_wenxinworkshop", "gemini", "qanything", "koboldcpp"]
 
             # 配置加载
             self.config_load()
@@ -134,6 +144,16 @@ class My_handle(metaclass=SingletonMeta):
             logging.info(f"配置数据加载成功。")
         except Exception as e:
             logging.error(traceback.format_exc())     
+
+
+    # 是否位于数据处理状态
+    def is_handle_empty(self):
+        return My_handle.is_handleing
+
+
+    # 音频队列、播放相关情况
+    def is_audio_queue_empty(self):
+        return My_handle.audio.is_audio_queue_empty()
 
 
     def get_chat_model(self, chat_type, config):
@@ -203,6 +223,7 @@ class My_handle(metaclass=SingletonMeta):
                 f.write('')
                 logging.info(f'{self.log_file_path} 日志文件已创建')
 
+        # 生成弹幕文件
         self.comment_file_path = "./log/comment-" + My_handle.common.get_bj_time(1) + ".txt"
         if os.path.isfile(self.comment_file_path):
             logging.info(f'{self.comment_file_path} 弹幕文件已存在，跳过')
@@ -368,12 +389,15 @@ class My_handle(metaclass=SingletonMeta):
                 if tmp != None:
                     logging.info(f'触发本地问答库-文本 [{My_handle.config.get("assistant_anchor", "username")}]: {data_json["content"]}')
                     # 将问答库中设定的参数替换为指定内容，开发者可以自定义替换内容
-                    if "{cur_time}" in tmp:
-                        tmp = tmp.format(cur_time=My_handle.common.get_bj_time(5))
-                    if "{username}" in tmp:
-                        tmp = tmp.format(username=My_handle.config.get("assistant_anchor", "username"))
-                    else:
-                        tmp = tmp
+                    # 假设有多个未知变量，用户可以在此处定义动态变量
+                    variables = {
+                        'cur_time': My_handle.common.get_bj_time(5),
+                        'username': My_handle.config.get("assistant_anchor", "username")
+                    }
+
+                    # 使用字典进行字符串替换
+                    if any(var in tmp for var in variables):
+                        tmp = tmp.format(**{var: value for var, value in variables.items() if var in tmp})
                     
                     logging.info(f"助播 本地问答库-文本回答为: {tmp}")
 
@@ -400,8 +424,8 @@ class My_handle(metaclass=SingletonMeta):
 
                     message = {
                         "type": "assistant_anchor_text",
-                        "tts_type": My_handle.config.get("audio_synthesis_type"),
-                        "data": My_handle.config.get(My_handle.config.get("audio_synthesis_type")),
+                        "tts_type": My_handle.config.get("assistant_anchor", "audio_synthesis_type"),
+                        "data": My_handle.config.get(My_handle.config.get("assistant_anchor", "audio_synthesis_type")),
                         "config": My_handle.config.get("filter"),
                         "user_name": My_handle.config.get("assistant_anchor", "username"),
                         "content": resp_content
@@ -450,8 +474,8 @@ class My_handle(metaclass=SingletonMeta):
                             logging.info(f"匹配到的音频路径：{resp_content}")
                             message = {
                                 "type": "assistant_anchor_audio",
-                                "tts_type": My_handle.config.get("audio_synthesis_type"),
-                                "data": My_handle.config.get(My_handle.config.get("audio_synthesis_type")),
+                                "tts_type": My_handle.config.get("assistant_anchor", "audio_synthesis_type"),
+                                "data": My_handle.config.get(My_handle.config.get("assistant_anchor", "audio_synthesis_type")),
                                 "config": My_handle.config.get("filter"),
                                 "user_name": My_handle.config.get("assistant_anchor", "username"),
                                 "content": data_json["content"],
@@ -580,12 +604,15 @@ class My_handle(metaclass=SingletonMeta):
             if tmp != None:
                 logging.info(f"触发本地问答库-文本 [{user_name}]: {content}")
                 # 将问答库中设定的参数替换为指定内容，开发者可以自定义替换内容
-                if "{cur_time}" in tmp:
-                    tmp = tmp.format(cur_time=My_handle.common.get_bj_time(5))
-                if "{username}" in tmp:
-                    tmp = tmp.format(username=user_name)
-                else:
-                    tmp = tmp
+                # 假设有多个未知变量，用户可以在此处定义动态变量
+                variables = {
+                    'cur_time': My_handle.common.get_bj_time(5),
+                    'username': user_name
+                }
+
+                # 使用字典进行字符串替换
+                if any(var in tmp for var in variables):
+                    tmp = tmp.format(**{var: value for var, value in variables.items() if var in tmp})
                 
                 logging.info(f"本地问答库-文本回答为: {tmp}")
 
@@ -721,6 +748,22 @@ class My_handle(metaclass=SingletonMeta):
 
                 # 去除命令前缀
                 content = content[len(start_cmd):]
+
+                # 说明用户仅发送命令，没有发送歌名，说明用户不会用
+                if content == "":
+                    message = {
+                        "type": "comment",
+                        "tts_type": My_handle.config.get("audio_synthesis_type"),
+                        "data": My_handle.config.get(My_handle.config.get("audio_synthesis_type")),
+                        "config": My_handle.config.get("filter"),
+                        "user_name": user_name,
+                        "content": f'点歌命令错误，命令为 {My_handle.config.get("choose_song", "start_cmd")}+歌名'
+                    }
+
+                    self.audio_synthesis_handle(message)
+
+                    return True
+
                 # 判断是否有此歌曲
                 song_filename = My_handle.common.find_best_match(content, choose_song_song_lists, similarity=My_handle.config.get("choose_song", "similarity"))
                 if song_filename is None:
@@ -777,6 +820,17 @@ class My_handle(metaclass=SingletonMeta):
         return False
 
 
+    """
+    
+         ]@@@@@               =@@       @@^              =@@@@@@].  .@@` ./@@@ ,@@@^                /@^                     
+        @@^      @@*          =@@       @@^              =@@   ,@@\      =@@   @@^                                          
+        \@@].  =@@@@@.=@@@@@` =@@@@@@@. @@^ ./@@@@\.     =@@    .@@^.@@.@@@@@@@@@@@.@@   @@^ /@@@@^ @@^ ./@@@@@]  @@/@@@@.  
+          ,\@@\  @@*   .]]/@@ =@@.  =@\ @@^ @@\]]/@^     =@@     @@^.@@. =@@   @@^ .@@   @@^ @@\`   @@^ @@^   \@^ @@`  \@^  
+             @@^ @@* ,@@` =@@ =@@   =@/ @@^ @@`          =@@   ./@/ .@@. =@@   @@^ .@@.  @@^   ,\@@ @@^ @@^   /@^ @@*  =@^  
+       .@@@@@@/  \@@@.@@@@@@@ =@@@@@@/  @@^ .\@@@@@.     =@@@@@@/`  .@@. =@@   @@^  =@@@@@@^.@@@@@^ @@^ .\@@@@@`  @@*  =@^ 
+    
+    """
+
     # 画图模式 SD 处理
     def sd_handle(self, data):
         """画图模式 SD 处理
@@ -806,16 +860,19 @@ class My_handle(metaclass=SingletonMeta):
                 # 输出当前用户发送的弹幕消息
                 logging.info(f"[{user_name}]: {content}")
 
+                # 删除文本中的命令前缀
                 content = content[len(My_handle.config.get("sd", "trigger")):]
+
+                # 判断翻译类型 进行翻译工作
+                tmp = My_handle.my_translate.trans(content, My_handle.config.get("sd", "translate_type"))
+                if tmp:
+                    content = tmp
 
                 """
                 根据聊天类型执行不同逻辑
                 """ 
                 chat_type = My_handle.config.get("sd", "prompt_llm", "type")
-                # 新增LLM需要在这里追加
-                if chat_type in ["chatgpt", "claude", "claude2", "chatglm", "chat_with_file", "text_generation_webui", \
-                    "sparkdesk", "langchain_chatglm", "langchain_chatchat", "zhipu", "bard", "yiyan", "tongyi", \
-                    "tongyixingchen", "my_qianfan", "my_wenxinworkshop", "gemini"]:
+                if chat_type in self.chat_type_list:
                     content = My_handle.config.get("sd", "prompt_llm", "before_prompt") + \
                         content + My_handle.config.get("after_prompt")
                     
@@ -834,7 +891,7 @@ class My_handle(metaclass=SingletonMeta):
                 else:
                     resp_content = content
 
-                logging.info(f"resp_content={resp_content}")
+                logging.info(f"传给SD接口的内容：{resp_content}")
 
                 self.sd.process_input(resp_content)
                 return True
@@ -853,13 +910,13 @@ class My_handle(metaclass=SingletonMeta):
             str: 处理完毕后的弹幕内容/None
         """
         # 判断弹幕是否以xx起始，如果是则返回None
-        if My_handle.config.get("filter")["before_filter_str"] and any(
-                content.startswith(prefix) for prefix in My_handle.config.get("filter")["before_filter_str"]):
+        if My_handle.config.get("filter", "before_filter_str") and any(
+                content.startswith(prefix) for prefix in My_handle.config.get("filter", "before_filter_str")):
             return None
 
         # 判断弹幕是否以xx结尾，如果是则返回None
-        if My_handle.config.get("filter")["after_filter_str"] and any(
-                content.endswith(prefix) for prefix in My_handle.config.get("filter")["after_filter_str"]):
+        if My_handle.config.get("filter", "after_filter_str") and any(
+                content.endswith(prefix) for prefix in My_handle.config.get("filter", "after_filter_str")):
             return None
 
         # 判断弹幕是否包含xx关键词，如果不是则返回None
@@ -868,21 +925,21 @@ class My_handle(metaclass=SingletonMeta):
             return None
 
         # 判断弹幕是否以xx起始，如果不是则返回None
-        if My_handle.config.get("filter")["before_must_str"] and not any(
-                content.startswith(prefix) for prefix in My_handle.config.get("filter")["before_must_str"]):
+        if My_handle.config.get("filter", "before_must_str") and not any(
+                content.startswith(prefix) for prefix in My_handle.config.get("filter", "before_must_str")):
             return None
         else:
-            for prefix in My_handle.config.get("filter")["before_must_str"]:
+            for prefix in My_handle.config.get("filter", "before_must_str"):
                 if content.startswith(prefix):
                     content = content[len(prefix):]  # 删除匹配的开头
                     break
 
         # 判断弹幕是否以xx结尾，如果不是则返回None
-        if My_handle.config.get("filter")["after_must_str"] and not any(
-                content.endswith(prefix) for prefix in My_handle.config.get("filter")["after_must_str"]):
+        if My_handle.config.get("filter", "after_must_str") and not any(
+                content.endswith(prefix) for prefix in My_handle.config.get("filter", "after_must_str")):
             return None
         else:
-            for prefix in My_handle.config.get("filter")["after_must_str"]:
+            for prefix in My_handle.config.get("filter", "after_must_str"):
                 if content.endswith(prefix):
                     content = content[:-len(prefix)]  # 删除匹配的结尾
                     break
@@ -893,6 +950,12 @@ class My_handle(metaclass=SingletonMeta):
 
         # 换行转为,
         content = content.replace('\n', ',')
+
+        # 表情弹幕过滤
+        if My_handle.config.get("filter", "emoji"):
+            # 如b站的表情弹幕就是[表情名]的这种格式，采用正则表达式进行过滤
+            content = re.sub(r'\[.*?\]', '', content)
+            logging.info(f"表情弹幕过滤后：{content}")
 
         # 语言检测
         if My_handle.common.lang_check(content, My_handle.config.get("need_lang")) is None:
@@ -950,11 +1013,12 @@ class My_handle(metaclass=SingletonMeta):
 
 
     # 直接复读
-    def reread_handle(self, data):
+    def reread_handle(self, data, filter=False):
         """复读处理
 
         Args:
             data (dict): 包含用户名,弹幕内容
+            filter (bool): 是否开启复读内容的过滤
 
         Returns:
             _type_: 寂寞
@@ -964,6 +1028,22 @@ class My_handle(metaclass=SingletonMeta):
         content = data["content"]
 
         logging.info(f"复读内容：{content}")
+
+        if filter:
+            # 违禁处理
+            content = self.prohibitions_handle(content)
+            if content is None:
+                return
+            
+            # 弹幕格式检查和特殊字符替换
+            content = self.comment_check_and_replace(content)
+            if content is None:
+                return
+            
+            # 判断字符串是否全为标点符号，是的话就过滤
+            if My_handle.common.is_punctuation_string(content):
+                logging.debug(f"用户:{username}]，发送纯符号的弹幕，已过滤")
+                return
         
         # 音频合成时需要用到的重要数据
         message = {
@@ -999,15 +1079,36 @@ class My_handle(metaclass=SingletonMeta):
         根据聊天类型执行不同逻辑
         """ 
         chat_type = My_handle.config.get("chat_type")
-        # 新增LLM需要在这里追加
-        if chat_type in ["chatgpt", "claude", "claude2", "chatglm", "alice", "chat_with_file", "text_generation_webui", \
-            "sparkdesk", "langchain_chatglm", "langchain_chatchat", "zhipu", "bard", "yiyan", "tongyi", \
-            "tongyixingchen", "my_qianfan", "my_wenxinworkshop", "gemini"]:
+        if chat_type in self.chat_type_list:
             resp_content = self.llm_handle(chat_type, data_json)
             if resp_content is not None:
                 logging.info(f"[AI回复{My_handle.config.get('talk', 'username')}]：{resp_content}")
             else:
                 logging.warning(f"警告：{chat_type}无返回")
+
+
+    """
+
+                 .@@@@@@@@@@@                    .@@@@@@@@@@@                    .@@@@@@@@@@@@@@^         /@@@@@@@@@@@@@@              
+                 .@@@@@@@@@@@                    .@@@@@@@@@@@                    .@@@@@@@@@@@@@@@        ,@@@@@@@@@@@@@@@              
+                 .@@@@@@@@@@@                    .@@@@@@@@@@@                    .@@@@@@@@@@@@@@@^       /@@@@@@@@@@@@@@@              
+                 .@@@@@@@@@@@                    .@@@@@@@@@@@                    .@@@@@@@@@@@@@@@@.     ,@@@@@@@@@@@@@@@@              
+                 .@@@@@@@@@@@                    .@@@@@@@@@@@                    .@@@@@@@@@@@@@@@@^     /@@@@@@@@@@@@@@@@              
+                 .@@@@@@@@@@@                    .@@@@@@@@@@@                    .@@@@@@@@@=@@@@@@@.   ,@@@@@@@^@@@@@@@@@              
+                 .@@@@@@@@@@@                    .@@@@@@@@@@@                    .@@@@@@@@@.@@@@@@@^   @@@@@@@@.@@@@@@@@@              
+                 .@@@@@@@@@@@                    .@@@@@@@@@@@                    .@@@@@@@@@ =@@@@@@@. =@@@@@@@^.@@@@@@@@@              
+                 .@@@@@@@@@@@                    .@@@@@@@@@@@                    .@@@@@@@@@ .@@@@@@@^ @@@@@@@@ .@@@@@@@@@              
+                 .@@@@@@@@@@@                    .@@@@@@@@@@@                    .@@@@@@@@@  =@@@@@@@=@@@@@@@^ .@@@@@@@@@              
+                 .@@@@@@@@@@@                    .@@@@@@@@@@@                    .@@@@@@@@@  .@@@@@@@@@@@@@@@  .@@@@@@@@@              
+                 .@@@@@@@@@@@                    .@@@@@@@@@@@                    .@@@@@@@@@   =@@@@@@@@@@@@@^  .@@@@@@@@@              
+                 .@@@@@@@@@@@                    .@@@@@@@@@@@                    .@@@@@@@@@   .@@@@@@@@@@@@/   .@@@@@@@@@              
+                 .@@@@@@@@@@@@@@@@@@@@@@@@@@@^   .@@@@@@@@@@@@@@@@@@@@@@@@@@@^   .@@@@@@@@@    =@@@@@@@@@@@`   .@@@@@@@@@              
+                 .@@@@@@@@@@@@@@@@@@@@@@@@@@@^   .@@@@@@@@@@@@@@@@@@@@@@@@@@@^   .@@@@@@@@@    .@@@@@@@@@@/    .@@@@@@@@@              
+                 .@@@@@@@@@@@@@@@@@@@@@@@@@@@^   .@@@@@@@@@@@@@@@@@@@@@@@@@@@^   .@@@@@@@@@     =@@@@@@@@@`    .@@@@@@@@@              
+                 .@@@@@@@@@@@@@@@@@@@@@@@@@@@^   .@@@@@@@@@@@@@@@@@@@@@@@@@@@^   .@@@@@@@@@     .@@@@@@@@/     .@@@@@@@@@  
+
+    """
+
 
     # LLM处理
     def llm_handle(self, chat_type, data):
@@ -1026,7 +1127,7 @@ class My_handle(metaclass=SingletonMeta):
             # setattr(self, chat_type, GPT_MODEL.get(chat_type))
             
         resp_content = None
-        print(f'''data: {data}''')
+        # print(f'''data: {data}''')
 
         # 新增LLM需要在这里追加
         chat_model_methods = {
@@ -1035,7 +1136,7 @@ class My_handle(metaclass=SingletonMeta):
             "claude2": lambda: self.claude2.get_resp(data["content"]),
             "chatterbot": lambda: self.bot.get_response(data["content"]).text,
             "chatglm": lambda: self.chatglm.get_resp(data["content"]),
-            "alice": lambda: self.alice.get_resp(data["user_name"], data["content"]),
+            "qwen": lambda: self.qwen.get_resp(data["user_name"], data["content"]),
             "chat_with_file": lambda: self.chat_with_file.get_model_resp(data["content"]),
             "text_generation_webui": lambda: self.text_generation_webui.get_resp(data["content"]),
             "sparkdesk": lambda: self.sparkdesk.get_resp(data["content"]),
@@ -1049,6 +1150,8 @@ class My_handle(metaclass=SingletonMeta):
             "my_qianfan": lambda: self.my_qianfan.get_resp(data["content"]),
             "my_wenxinworkshop": lambda: self.my_wenxinworkshop.get_resp(data["content"]),
             "gemini": lambda: self.gemini.get_resp(data["content"]),
+            "qanything": lambda: self.qanything.get_resp({"prompt": data["content"]}),
+            "koboldcpp": lambda: self.koboldcpp.get_resp({"prompt": data["content"]}),
             "reread": lambda: data["content"]
         }
 
@@ -1462,69 +1565,155 @@ class My_handle(metaclass=SingletonMeta):
         """
         flag = False
 
-        # 官方文档：https://pyautogui.readthedocs.io/en/latest/keyboard.html#keyboard-keys
-        if My_handle.config.get("key_mapping", "enable"):
-            # 判断传入的数据是否包含gift_name键值，有的话则是礼物数据
-            if "gift_name" in data:
-                # 获取key_mapping 所有 config数据
-                key_mapping_configs = My_handle.config.get("key_mapping", "config")
+        # 获取一个文案并传递给音频合成函数进行音频合成
+        def get_a_copywriting_and_audio_synthesis(key_mapping_config, data):
+            # 随机获取一个文案
+            tmp = random.choice(key_mapping_config["copywriting"])
 
-                # 遍历key_mapping_configs
-                for key_mapping_config in key_mapping_configs:
-                    # 遍历单个配置中所有礼物名
-                    for gift in key_mapping_config["gift"]:
-                        # 判断礼物名是否相同
-                        if gift == data["gift_name"]:
-                            # 触发对应按键按下释放
-                            for key in key_mapping_config["keys"]:
-                                pyautogui.keyDown(key)
-                            for key in key_mapping_config["keys"]:
-                                pyautogui.keyUp(key)
+            # 假设有多个未知变量，用户可以在此处定义动态变量
+            variables = {
+                'user_name': data["username"],
+                'gift_name': data["gift_name"] if "gift_name" in data else ""
+            }
 
-                            logging.info(f'【触发按键映射】礼物：{gift} 按键：{key_mapping_config["keys"]}')
+            # 使用字典进行字符串替换
+            if any(var in tmp for var in variables):
+                tmp = tmp.format(**{var: value for var, value in variables.items() if var in tmp})
 
-                            flag = True
-            else:
-                content = data["content"]
-                # 判断命令头是否匹配
-                start_cmd = My_handle.config.get("key_mapping", "start_cmd")
-                if start_cmd != "" and content.startswith(start_cmd):
-                    # 删除命令头部
-                    content = content[len(start_cmd):]
+            # 音频合成时需要用到的重要数据
+            message = {
+                "type": "direct_reply",
+                "tts_type": My_handle.config.get("audio_synthesis_type"),
+                "data": My_handle.config.get(My_handle.config.get("audio_synthesis_type")),
+                "config": My_handle.config.get("filter"),
+                "user_name": data["username"],
+                "content": tmp
+            }
 
-                key_mapping_configs = My_handle.config.get("key_mapping", "config")
+            logging.info(f'【触发按键映射】触发文案：{tmp}')
 
-                for key_mapping_config in key_mapping_configs:
-                    similarity = float(key_mapping_config["similarity"])
-                    for keyword in key_mapping_config["keywords"]:
-                        if type == "弹幕":
-                            # 判断相似度
-                            ratio = difflib.SequenceMatcher(None, content, keyword).ratio()
-                            if ratio >= similarity:
-                                # 触发对应按键按下释放
-                                for key in key_mapping_config["keys"]:
-                                    pyautogui.keyDown(key)
-                                for key in key_mapping_config["keys"]:
-                                    pyautogui.keyUp(key)
+            self.audio_synthesis_handle(message)
 
-                                logging.info(f'【触发按键映射】关键词：{keyword} 按键：{key_mapping_config["keys"]}')
+        try:
+            # 官方文档：https://pyautogui.readthedocs.io/en/latest/keyboard.html#keyboard-keys
+            if My_handle.config.get("key_mapping", "enable"):
+                # 判断传入的数据是否包含gift_name键值，有的话则是礼物数据
+                if "gift_name" in data:
+                    # 获取key_mapping 所有 config数据
+                    key_mapping_configs = My_handle.config.get("key_mapping", "config")
 
-                                flag = True
-                        elif type == "回复":
-                            logging.debug(f"keyword={keyword}, content={content}")
-                            if keyword in content:
-                                logging.info(f'【触发按键映射】关键词：{keyword} 按键：{key_mapping_config["keys"]}')
+                    # 遍历key_mapping_configs
+                    for key_mapping_config in key_mapping_configs:
+                        # 遍历单个配置中所有礼物名
+                        for gift in key_mapping_config["gift"]:
+                            # 判断礼物名是否相同
+                            if gift == data["gift_name"]:
 
-                                # 触发对应按键按下释放
-                                for key in key_mapping_config["keys"]:
-                                    pyautogui.keyDown(key)
-                                for key in key_mapping_config["keys"]:
-                                    pyautogui.keyUp(key)
+                                # 按键触发类型是否包含了礼物类
+                                if My_handle.config.get("key_mapping", "key_trigger_type") in ["礼物", "关键词+礼物"]:
+                                    # 触发对应按键按下释放
+                                    for key in key_mapping_config["keys"]:
+                                        pyautogui.keyDown(key)
+                                    for key in key_mapping_config["keys"]:
+                                        pyautogui.keyUp(key)
 
-                                flag = True
-            
+                                    logging.info(f'【触发按键映射】礼物：{gift} 按键：{key_mapping_config["keys"]}')
+
+                                    flag = True
+
+                                # 文案触发类型是否包含了礼物类
+                                if My_handle.config.get("key_mapping", "copywriting_trigger_type") in ["礼物", "关键词+礼物"]:
+                                    logging.info(f'【触发按键映射】礼物：{gift} ，触发文案')
+
+                                    get_a_copywriting_and_audio_synthesis(key_mapping_config, data)
+
+                                    flag = True
+                else:
+                    content = data["content"]
+                    # 判断命令头是否匹配
+                    start_cmd = My_handle.config.get("key_mapping", "start_cmd")
+                    if start_cmd != "" and content.startswith(start_cmd):
+                        # 删除命令头部
+                        content = content[len(start_cmd):]
+
+                    key_mapping_configs = My_handle.config.get("key_mapping", "config")
+
+                    
+                    for key_mapping_config in key_mapping_configs:
+                        similarity = float(key_mapping_config["similarity"])
+                        for keyword in key_mapping_config["keywords"]:
+                            if type == "弹幕":
+                                # 判断相似度
+                                ratio = difflib.SequenceMatcher(None, content, keyword).ratio()
+                                if ratio >= similarity:
+                                    # 按键触发类型是否包含了关键词
+                                    if My_handle.config.get("key_mapping", "key_trigger_type") in ["关键词", "关键词+礼物"]:
+                                        # 触发对应按键按下释放
+                                        for key in key_mapping_config["keys"]:
+                                            pyautogui.keyDown(key)
+                                        for key in key_mapping_config["keys"]:
+                                            pyautogui.keyUp(key)
+
+                                        logging.info(f'【触发按键映射】关键词：{keyword} 按键：{key_mapping_config["keys"]}')
+
+                                        flag = True
+                                    
+                                    # 文案触发类型是否包含了关键词
+                                    if My_handle.config.get("key_mapping", "copywriting_trigger_type") in ["关键词", "关键词+礼物"]:
+                                        logging.info(f'【触发按键映射】关键词：{keyword} ，触发文案')
+
+                                        get_a_copywriting_and_audio_synthesis(key_mapping_config, data)
+
+                                        flag = True
+                            elif type == "回复":
+                                logging.debug(f"keyword={keyword}, content={content}")
+                                if keyword in content:
+                                    # 按键触发类型是否包含了关键词
+                                    if My_handle.config.get("key_mapping", "key_trigger_type") in ["关键词", "关键词+礼物"]:
+                                        logging.info(f'【触发按键映射】关键词：{keyword} 按键：{key_mapping_config["keys"]}')
+
+                                        # 触发对应按键按下释放
+                                        for key in key_mapping_config["keys"]:
+                                            pyautogui.keyDown(key)
+                                        for key in key_mapping_config["keys"]:
+                                            pyautogui.keyUp(key)
+
+                                        flag = True
+
+                                    # 文案触发类型是否包含了关键词
+                                    if My_handle.config.get("key_mapping", "copywriting_trigger_type") in ["关键词", "关键词+礼物"]:
+                                        logging.info(f'【触发按键映射】关键词：{keyword} ，触发文案')
+
+                                        get_a_copywriting_and_audio_synthesis(key_mapping_config, data)
+
+                                        flag = True
+        except Exception as e:
+            logging.error(traceback.format_exc())
+            logging.error(f'【触发按键映射】错误：{e}')
+
         return flag
 
+
+    """                                                              
+                                                                           
+                                                         ,`                
+                             @@@@`               =@@\`   /@@/              
+                ,/@@] =@@@`  @@@/                 =@@\/@@@@@@@@@[          
+           .\@@/[@@@@` ,@@@ =@/.             ,[[[[.=@^ ,@@@@\`             
+                *@@^,`  .]]]@@@@@@\`          ,@@@@@@[[[. =@@@@.           
+           .]]]]/@@`\@@/ *@@^  =@@@/           ,@@@@@@@@/`@@@`             
+            =@@*    .@@@@@@@@/`@@@^             ,@@\]]/@@@@@.              
+            =@@      =@@*.@@\]/@@^               ,\@@\   ,]]@@@@]          
+          ,/@@@@@@@^  \@/[@@^               .@@@@@@@@@[[[\@\.              
+          ,@/. .@@@      .@@\]/@@@@@@`          ,@@@,@@@.,]@@@`            
+               .@@/@@@@@/[@@/                  /@@\]@@@@@@@@@@@@@]         
+               =@@^      .@@^                ]@@@@@^ @@@  @@@ ,@@@@@@\].   
+           ,]]/@@@`      .@@^             ./@/` .@@^.@@@/@@@/              
+             \@@@`       .@@^                       .@@@ .[[               
+                         .@@`                        @@^                   
+                                                                                                                                          
+
+    """
 
     # 弹幕处理
     def comment_handle(self, data):
@@ -1534,7 +1723,7 @@ class My_handle(metaclass=SingletonMeta):
             data (dict): 包含用户名,弹幕内容
 
         Returns:
-            _type_: 寂寞
+            dict: 传递给音频合成的JSON数据
         """
 
         try:
@@ -1542,7 +1731,7 @@ class My_handle(metaclass=SingletonMeta):
             content = data["content"]
 
             # 输出当前用户发送的弹幕消息
-            logging.info(f"[{user_name}]: {content}")
+            logging.debug(f"[{user_name}]: {content}")
 
             # 记录数据库
             if My_handle.config.get("database", "comment_enable"):
@@ -1634,11 +1823,10 @@ class My_handle(metaclass=SingletonMeta):
             # 弹幕内容是否进行翻译
             if My_handle.config.get("translate", "enable") and (My_handle.config.get("translate", "trans_type") == "弹幕" or \
                 My_handle.config.get("translate", "trans_type") == "弹幕+回复"):
-                if My_handle.config.get("translate", "type") == "baidu":
-                    tmp = My_handle.my_translate.baidu_trans(content)
-                    if tmp:
-                        content = tmp
-                        # logging.info(f"翻译后：{content}")
+                tmp = My_handle.my_translate.trans(content)
+                if tmp:
+                    content = tmp
+                    # logging.info(f"翻译后：{content}")
 
             data_json = {
                 "user_name": user_name,
@@ -1649,11 +1837,28 @@ class My_handle(metaclass=SingletonMeta):
             根据聊天类型执行不同逻辑
             """ 
             chat_type = My_handle.config.get("chat_type")
-            # 新增LLM需要在这里追加
-            if chat_type in ["chatgpt", "claude", "claude2", "chatglm", "alice", "chat_with_file", "text_generation_webui", \
-                "sparkdesk", "langchain_chatglm", "langchain_chatchat", "zhipu", "bard", "yiyan", "tongyi", \
-                "tongyixingchen", "my_qianfan", "my_wenxinworkshop", "gemini"]:
-                data_json["content"] = My_handle.config.get("before_prompt") + content + My_handle.config.get("after_prompt")
+            if chat_type in self.chat_type_list:
+                
+
+                data_json["content"] = My_handle.config.get("before_prompt")
+                # 是否启用弹幕模板
+                if self.config.get("comment_template", "enable"):
+                    # 假设有多个未知变量，用户可以在此处定义动态变量
+                    variables = {
+                        'username': user_name,
+                        'comment': content,
+                        'cur_time': My_handle.common.get_bj_time(5),
+                    }
+
+                    comment_template_copywriting = self.config.get("comment_template", "copywriting")
+                    # 使用字典进行字符串替换
+                    if any(var in comment_template_copywriting for var in variables):
+                        content = comment_template_copywriting.format(**{var: value for var, value in variables.items() if var in comment_template_copywriting})
+
+                data_json["content"] += content + My_handle.config.get("after_prompt")
+
+                logging.debug(f"data_json={data_json}")
+                
                 resp_content = self.llm_handle(chat_type, data_json)
                 if resp_content is not None:
                     logging.info(f"[AI回复{user_name}]：{resp_content}")
@@ -1742,8 +1947,11 @@ class My_handle(metaclass=SingletonMeta):
             }
 
             self.audio_synthesis_handle(message)
+
+            return message
         except Exception as e:
             logging.error(traceback.format_exc())
+            return None
 
 
     # 礼物处理
@@ -2101,6 +2309,7 @@ class My_handle(metaclass=SingletonMeta):
             if hasattr(self.timers[timer_flag], 'last_data'):
                 self.timers[timer_flag].last_data.append(data)
                 # 这里需要注意配置命名!!!
+                # 保留数据数量
                 if len(self.timers[timer_flag].last_data) > int(My_handle.config.get("filter", timer_flag + "_forget_reserve_num")):
                     self.timers[timer_flag].last_data.pop(0)
             else:
@@ -2111,6 +2320,8 @@ class My_handle(metaclass=SingletonMeta):
             timer = self.timers.get(timer_flag)
             if timer and timer.last_data is not None and timer.last_data != []:
                 logging.debug(f"预处理定时器触发 type={timer_flag}，data={timer.last_data}")
+
+                My_handle.is_handleing = 1
 
                 if timer_flag == "comment":
                     for data in timer.last_data:
@@ -2141,6 +2352,8 @@ class My_handle(metaclass=SingletonMeta):
                     for data in timer.last_data:
                         self.idle_time_task_handle(data)
                     #self.idle_time_task_handle(timer.last_data)
+
+                My_handle.is_handleing = 0
 
                 # 清空数据
                 timer.last_data = []
