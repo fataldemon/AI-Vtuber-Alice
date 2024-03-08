@@ -2353,10 +2353,10 @@ def goto_func_page():
                         input_qwen_preset = ui.input(label='预设',
                                                         placeholder='用于指定一组预定义的设置，以便模型更好地适应特定的对话场景。',
                                                         value=config.get("chatgpt", "preset")).style("width:500px")
-					with ui.row():
-                    input_alice_setting_document = ui.input(label='设定文档地址', placeholder='放置设定文件的文档绝对地址，使用embedding传入LLM', value=config.get("alice", "setting_document"))
-                    input_alice_setting_document.style("width:500px")
-                    switch_alice_autohotkey_enable = ui.switch('保证AutoHotKey脚本运行，表情动作控制', value=config.get("alice", "autohotkey_enable")).style(switch_internal_css)
+                    with ui.row():
+                        input_alice_setting_document = ui.input(label='设定文档地址', placeholder='放置设定文件的文档绝对地址，使用embedding传入LLM', value=config.get("alice", "setting_document"))
+                        input_alice_setting_document.style("width:500px")
+                        switch_alice_autohotkey_enable = ui.switch('保证AutoHotKey脚本运行，表情动作控制', value=config.get("alice", "autohotkey_enable")).style(switch_internal_css)
 
             if config.get("webui", "show_card", "llm", "chat_with_file"):
                 with ui.card().style(card_css):
